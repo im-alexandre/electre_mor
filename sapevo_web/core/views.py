@@ -1,7 +1,12 @@
-from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from core.forms import DecisorForm, NomeProjetoForm, AlternativaForm, CriterioForm
-from core.models import Projeto, Decisor, Alternativa, Criterio, AvaliacaoCriterios, AvaliacaoAlternativas, PageView
+from django.shortcuts import redirect, render, reverse
+
+from core.forms import (AlternativaForm, CriterioForm, DecisorForm,
+                        NomeProjetoForm)
+from core.models import (Alternativa, AvaliacaoAlternativas,
+                         AvaliacaoCriterios, Criterio, Decisor, PageView,
+                         Projeto)
+
 from .metodo import *
 
 
@@ -493,4 +498,3 @@ def electre(pesos_criterios, lista_somas):
     print(resposta)
     with open('teste.xlsx', 'w') as fp:
         fp.write(str(resposta.json()['value']))
-

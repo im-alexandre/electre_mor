@@ -1,5 +1,9 @@
-from core.models import Projeto, Decisor, Alternativa, Criterio, AvaliacaoCriterios, AvaliacaoAlternativas, PageView
 import collections
+
+from core.models import (Alternativa, AvaliacaoAlternativas,
+                         AvaliacaoCriterios, Criterio, Decisor, PageView,
+                         Projeto)
+
 
 def inclui_decisor_no_projeto(projeto, decisor):
     projeto.decisores.add(decisor)

@@ -1,5 +1,6 @@
-from django.db import models
 from django import forms
+from django.db import models
+
 
 class Decisor(models.Model):
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)

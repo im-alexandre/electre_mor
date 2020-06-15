@@ -4,10 +4,11 @@
 # In[1]:
 
 
-import requests as r
 import json
+
 import pandas as pd
 
+import requests as r
 
 # ### Dicionário contendo os dados para o electre
 
@@ -63,7 +64,3 @@ payload = json.dumps(ests)
 
 
 # # In[ ]:
-
-
-
-

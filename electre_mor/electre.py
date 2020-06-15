@@ -6,14 +6,13 @@ Github: https://www.github.com/im-alexandre
 Description: SAPEVO method implementation
 """
 
-from typing import Tuple, List, Dict, Union
 import itertools
 import json
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-
 
 
 class DecisionMatrix:
