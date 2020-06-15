@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block container %}
+
+    <h1>Projeto {{projeto_nome}}</h1>
+    <hr>
+    <h2>Avaliar Critérios</h2>
+
+    <br>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label for="id_decisor_id">Qual é o decisor?</label>
+        <select name="decisor_id" id="id_decisor_id">
+            {% for decisor in decisores %}
+                <option value="{{decisor.0}}">{{decisor.1}}</option>
+            {% endfor %}
+        </select>    
+
+        <br>
+        <br>
+        <div id="criterios">
+          <table>
+          
+<tbody>
+        {% for criterios in criterios_combinados %}
+                <td>
+          <tr >{{criterios.0}}</tr>
+          <tr><input type="range" min=-3 max=3 step=1
+                                              name="{{criterios.2}}{{criterios.3}}"
+                                              value=0 list="z">
+            {% include 'partials/_datalist_range.html' %}
+            </input>
+          </tr>
+          <tr>{{criterios.1}}</tr>
+        </td>
+            <!-- {{criterios}} -->
+            <br>
+        {% endfor %}
+        </tbody>
+
+        </div>  
+        <hr>
+          </table>
+        <input type="submit" class="btn btn-outline-primary" value="Avaliar">
+    </form>
+    
+{% endblock %}
