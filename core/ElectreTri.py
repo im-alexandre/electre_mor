@@ -94,9 +94,9 @@ class ElectreTri():
             return 1
         elif serie['q'] < diferenca <= serie['p']:
             pesos = w.sum()
-            resposta = (1 - (serie['q'] - diferenca)) * serie['w'] / (
-                (-serie['p'] - serie['q']) * pesos)
-            return resposta
+            resposta = 1 - ((serie['q'] - diferenca) /
+                            (-serie['p'] - serie['q']))
+            return resposta * serie['w'] / pesos
 
     def renderizar(self, ):
         """docstring for renderizar"""
