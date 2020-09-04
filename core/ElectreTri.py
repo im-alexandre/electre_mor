@@ -78,7 +78,7 @@ class ElectreTri():
         fronteiras de classe em cada critério
         """
         diferenca = serie[bh] - serie[xi]
-        if diferenca < serie['p']:
+        if diferenca <= serie['p']:
             return 0
         elif diferenca > serie['v']:
             return 1
@@ -90,11 +90,10 @@ class ElectreTri():
         diferenca = serie[bh] - serie[xi]
         if diferenca >= serie['p']:
             return 0
-        elif diferenca < serie['q']:
+        elif diferenca <= serie['q']:
             return 1
-        elif serie['q'] <= diferenca < serie['p']:
-            resposta = ((serie['p'] - diferenca) * serie['w']) / (serie['p'] -
-                                                                  serie['q'])
+        elif serie['q'] < diferenca <= serie['p']:
+            resposta = ((1 - (serie['q'] - diferenca)) / (serie['p'] - serie['q'])) * serie ['w'] 
             pesos = w.sum()
             return resposta / pesos
 
