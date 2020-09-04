@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block container %}
+
+<h1>Projeto {{projeto_nome}}</h1>
+<hr>
+<h2>Cadastrar Decisor</h2>
+
+<div class="d-flex justify-content-center">
+    <form id="MyForm" method="post">
+         {% csrf_token %}
+        <h1>Decisores</h1>
+        <table id="decisor_form_set">
+            <tbody>
+                {% for form in decisor_form_set.forms %}
+                <tr>
+                   <td class="ml-8">{{ form }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ decisor_form_set.management_form }}
+
+        <hr>
+        <h1>Critérios</h1>
+        <table id="criterio_form_set">
+            <tbody>
+            {% for form in criterio_form_set.forms %}
+            <tr>
+                <td class="ml-8">{{ form.nome.label }}</td>
+                <td class="ml-8">{{ form.nome }}</td>
+                <td class="ml-8">{{ form.numerico.label }}</td>
+                <td class="ml-8">{{ form.numerico }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {{ criterio_form_set.management_form }}
+
+        <hr>
+        <h1>Alternativas</h1>
+        <table id="alternativa_form_set">
+            <tbody>
+            {% for form in alternativa_form_set.forms %}
+            <tr>
+                <td class="ml-8">{{ form }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {{ alternativa_form_set.management_form }}
+        <input type="submit" class="btn btn-outline-primary" value="Avaliar Projeto">
+    </form>
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+<script type="text/javascript">
+    $(function() {
+       $('#decisor_form_set tbody tr').formset({
+       prefix: '{{ decisor_form_set.prefix }}',
+       formCssClass: 'dynamic-formset1'
+    });
+    });
+    $(function() {
+        $('#criterio_form_set tbody tr').formset({
+       prefix: '{{ criterio_form_set.prefix }}',
+       formCssClass: 'dynamic-formset2'
+    });
+    });
+    $(function() {
+        $('#alternativa_form_set tbody tr').formset({
+       prefix: '{{ alternativa_form_set.prefix }}',
+       formCssClass: 'dynamic-formset3'
+    });
+    });
+</script>
+{% endblock %}
