@@ -2,17 +2,19 @@ import mimetypes
 import os
 import warnings
 import zipfile
-from itertools import combinations, cycle, product
+from itertools import combinations, permutations, product
 
 import pandas as pd
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render, reverse
 
-from core.forms import (AlternativaForm, CriterioForm, DecisorForm,
+from core.forms import (AlternativaCriterioForm, AlternativaForm, CriterioForm,
+                        DecisorCriterioParametroForm, DecisorForm,
                         NomeProjetoForm)
-from core.models import (Alternativa, AvaliacaoAlternativas,
-                         AvaliacaoCriterios, Criterio, Decisor, Projeto)
+from core.models import (Alternativa, AlternativaCriterio,
+                         AvaliacaoAlternativas, AvaliacaoCriterios, Criterio,
+                         Decisor, DecisorCriterioParametro, Projeto)
 
 from .ElectreTri import ElectreTri
 from .method import MatrizProjeto
@@ -77,34 +79,6 @@ def deletarprojeto(request, projeto_id):
     return redirect(redirect_page, projeto_id=params_redirect)
 
 
-def editardados(request):
-    nome = request.POST['nome']
-    tipo_id = request.POST['tipoId'].split(':')
-    tipo, _id = tipo_id[0], tipo_id[1]
-
-    if tipo == 'projeto':
-        projeto = Projeto.objects.get(id=_id)
-        projeto.nome = _nome
-        projeto.save()
-
-    elif tipo == 'decisor':
-        decisor = Decisor.objects.get(id=_id)
-        decisor.nome = nome
-        decisor.save()
-
-    elif tipo == 'alternativa':
-        alternativa = Alternativa.objects.get(id=_id)
-        alternativa.nome = nome
-        alternativa.save()
-
-    elif tipo == 'criterio':
-        criterio = Criterio.objects.get(id=_id)
-        criterio.nome = nome
-        criterio.save()
-
-    return HttpResponse(nome)
-
-
 def cadastradecisores(request, projeto_id):
     projeto = Projeto.objects.get(id=projeto_id)
     template_name = 'cadastra_decisores.html'
@@ -152,66 +126,6 @@ def cadastradecisores(request, projeto_id):
         })
 
 
-def cadastraalternativas(request, projeto_id):
-    projeto = Projeto.objects.get(id=projeto_id)
-    template_name = 'cadastra_alternativas.html'
-    projeto_nome = projeto.nome
-    alternativas = Alternativa.objects.filter(projeto=projeto_id)
-    ultima_alternativa = None
-
-    if request.method == 'POST':
-        alternativa_form = AlternativaForm(request.POST)
-        if alternativa_form.is_valid():
-            alternativa_nova = alternativa_form.save()
-            alternativa_nova.projeto = projeto
-            alternativa_nova.save()
-
-        return redirect('cadastraalternativas', projeto_id=projeto.id)
-
-    else:
-        alternativa_form = AlternativaForm()
-
-    return render(
-        request, template_name, {
-            'alternativa_form': alternativa_form,
-            'alternativas': alternativas,
-            'projeto_nome': projeto_nome,
-            'projeto_id': projeto_id
-        })
-
-
-def cadastracriterios(request, projeto_id):
-    projeto = Projeto.objects.get(id=projeto_id)
-    template_name = 'cadastra_criterios.html'
-    projeto_nome = projeto.nome
-    criterios = Criterio.objects.filter(projeto=projeto_id)
-    criterios_quant = criterios.filter(numerico=True)
-    criterios_quali = criterios.filter(numerico=False)
-
-    if request.method == 'POST':
-        criterio_form = CriterioForm(request.POST)
-        if criterio_form.is_valid():
-            criterio_novo = criterio_form.save()
-            criterio_novo.projeto = projeto
-            criterio_novo.save()
-
-            return redirect('cadastracriterios', projeto_id=projeto.id)
-
-    else:
-        criterio_form = CriterioForm()
-
-    contexto = {
-        'criterio_form': criterio_form,
-        'criterios': criterios,
-        'projeto_nome': projeto_nome,
-        'projeto_id': projeto_id,
-        'criterios_quali': criterios_quali,
-        'criterios_quant': criterios_quant
-    }
-
-    return render(request, template_name, context=contexto)
-
-
 def avaliarcriterios(request, projeto_id):
     '''
     View para avaliar os critérios cadastrados.
@@ -234,8 +148,6 @@ def avaliarcriterios(request, projeto_id):
         for key, value in campos.items():
             tuplas = list(zip(decisor_id, value))
             notas_avaliadores[eval(key)] = tuplas
-
-        lista_avaliacoes = []
 
         for (criterioA, criterioB), avaliacoes in notas_avaliadores.items():
             for (avaliador, nota) in avaliacoes:
@@ -266,6 +178,35 @@ def avaliarcriterios(request, projeto_id):
             'criterios_combinados': criterios_combinados,
             'projeto_nome': projeto.nome,
         })
+
+
+def parametroCriterio(request, projeto_id):
+    '''
+    View para avaliar as alternativas cadastradas.
+    '''
+    template_name = 'parametro_criterio.html'
+    projeto = Projeto.objects.get(id=projeto_id)
+    decisores = Decisor.objects.filter(projeto=projeto_id)
+    criterios = Criterio.objects.filter(projeto=projeto_id)
+    alternativas = Alternativa.objects.filter(projeto=projeto_id)
+    formset = formset_factory(form=DecisorCriterioParametroForm, extra=0)
+    forms = formset(initial=[{
+        'projeto': projeto,
+        'criterio': criterio
+    } for criterio in criterios])
+
+    if request.method == 'POST':
+        forms = formset(request.POST)
+        for form in forms:
+            if form.is_valid():
+                form.save()
+
+        return redirect('resultado', projeto_id)
+
+    return render(request, template_name, {
+        'decisores': decisores,
+        'forms': forms,
+    })
 
 
 def avaliaralternativas(request, projeto_id):
@@ -317,7 +258,7 @@ def avaliaralternativas(request, projeto_id):
                                                   nota=-int(nota))
                 avaliacao.save()
 
-        return redirect('resultado', projeto_id)
+        return redirect('parametrocriterio', projeto_id)
 
     return render(
         request, template_name, {
@@ -331,7 +272,8 @@ def avaliaralternativas(request, projeto_id):
 def resultado(request, projeto_id):
     template_name = 'resultado.html'
     projeto = Projeto.objects.get(id=projeto_id)
-    alternativas = Alternativa.objects.filter(projeto=projeto)
+    parametros = DecisorCriterioParametro.objects.filter(projeto=projeto)
+    alternativas = Alternativa.objects.filter(projeto=projeto_id)
     matriz = MatrizProjeto(projeto)
     df_criterios = matriz.avaliacoes['criterios'].to_html()
 
@@ -342,14 +284,13 @@ def resultado(request, projeto_id):
     if alternativas:
         df_alternativas = matriz.avaliacoes['alternativas'].to_html()
         pontuacao_alternativas = matriz.pontuacao_alternativas
-
         parametros = pd.DataFrame(None,
                                   index='p q v w'.split(),
                                   columns=matriz.pesos_criterios['Critério'])
 
-        parametros.loc['p'] = 0.1
-        parametros.loc['q'] = 0.2
-        parametros.loc['v'] = 0.3
+        parametros = DecisorCriterioParametro.objects.filter(projeto=projeto)
+        parametros = parametros.to_pivot_table(values=['p', 'q', 'v'],
+                                               cols=['criterio'])
         parametros.loc['w'] = matriz.pesos_criterios['peso'].values
         parametros.index.rename('parametros')
         electre = ElectreTri(pontuacao_alternativas,
@@ -364,10 +305,9 @@ def resultado(request, projeto_id):
                              bn=3,
                              method='range')
         electre.renderizar()
+        electre.renderizar()
 
-        # pontuacao_alternativas.sort_values(by='pontuacao',
-        # ascending=False,
-        # inplace=True)
+        # pontuacao_alternativas.sort_values(by='pontuacao',ascending=False,inplace=True)
         pontuacao_alternativas = pontuacao_alternativas.to_html()
 
     else:

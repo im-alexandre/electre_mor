@@ -25,9 +25,6 @@ class Alternativa(models.Model):
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
     nome = models.CharField(max_length=20)
 
-    # TODO imagem na alternativa
-    # imagem = models.ImageField(upload_to = 'pic_folder/', default = 'pic_folder/no-img.jpg')
-
     def __str__(self):
         return self.nome
 
@@ -69,5 +66,23 @@ class AvaliacaoAlternativas(models.Model):
     objects = DataFrameManager()
 
 
-class PageView(models.Model):
-    views = models.IntegerField()
+class AlternativaCriterio(models.Model):
+    projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE)
+    criterio = models.ForeignKey('Criterio', on_delete=models.CASCADE)
+    alternativa = models.ForeignKey('Alternativa',
+                                    on_delete=models.CASCADE,
+                                    related_name='alternativa')
+
+    nota = models.FloatField(null=True)
+
+    objects = DataFrameManager()
+
+
+class DecisorCriterioParametro(models.Model):
+    projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE)
+    criterio = models.ForeignKey('Criterio', on_delete=models.CASCADE)
+    p = models.FloatField(null=True)
+    q = models.FloatField(null=True)
+    v = models.FloatField(null=True)
+
+    objects = DataFrameManager()

@@ -1,0 +1,12 @@
+
+{% extends "base.html" %}
+{% block container %}
+<h1>Cadastrar Projeto</h1>
+
+<br>
+<form method="post">
+    {% csrf_token %}
+    {{form}}
+    <input type="submit" class="btn btn-outline-primary" value="Avaliar">
+</form>
+{% endblock %}

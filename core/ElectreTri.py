@@ -36,24 +36,24 @@ class ElectreTri():
     def pessimista(self, row):
         """docstring for pessimista"""
         if row['cred(b,x)'] >= self.lamb and row['cred(x,b)'] >= self.lamb:
-            return 'x > b'
+            return 'x I b'
         elif row['cred(b,x)'] >= self.lamb and row['cred(x,b)'] < self.lamb:
             return 'x < b'
         elif row['cred(b,x)'] < self.lamb and row['cred(x,b)'] >= self.lamb:
             return 'x > b'
         else:
-            return 'x < b'
+            return 'x R b'
 
     def otimista(self, row):
         """docstring for pessimista"""
         if row['cred(b,x)'] >= self.lamb and row['cred(x,b)'] >= self.lamb:
-            return 'x > b'
+            return 'x I b'
         elif row['cred(b,x)'] >= self.lamb and row['cred(x,b)'] < self.lamb:
             return 'x < b'
         elif row['cred(b,x)'] < self.lamb and row['cred(x,b)'] >= self.lamb:
             return 'x > b'
         else:
-            return 'x > b'
+            return 'x R b'
 
     def credibilidade(self, row: pd.Series) -> float:
         """
@@ -82,21 +82,25 @@ class ElectreTri():
             return 0
         elif diferenca > serie['v']:
             return 1
-        elif serie['p'] <= diferenca < serie['v']:
+        else:
             resposta = (-serie['p'] + diferenca) / (serie['v'] - serie['p'])
             return resposta
 
-    def concordancia_parcial(self, serie, xi, bh, w):
+    def concordancia_parcial(self, serie, xi, bh):
         diferenca = serie[bh] - serie[xi]
         if diferenca >= serie['p']:
             return 0
         elif diferenca <= serie['q']:
             return 1
-        elif serie['q'] < diferenca <= serie['p']:
-            pesos = w.sum()
-            resposta = 1 - ((serie['q'] - diferenca) /
-                            (-serie['p'] - serie['q']))
-            return resposta * serie['w'] / pesos
+        else:
+            resposta = (serie['p'] - diferenca) / (serie['p'] - serie['q'])
+            return resposta
+
+    def concordancia_global(self, serie):
+        print(self.parametros)
+        W = self.parametros.loc['w', :]
+        resposta = sum(serie.values * W.values) / sum(W.values)
+        return resposta
 
     def renderizar(self, ):
         """docstring for renderizar"""
@@ -111,7 +115,6 @@ class ElectreTri():
 
         elif self.method == 'range':
             self.cla_df = self.entrada.apply(self._escalona)
-            print(self.cla_df)
             self.cla = [f'b{i}' for i in range(1, self.cla_df.shape[0] + 1)]
             self.cla_df.index = self.cla
 
@@ -129,15 +132,16 @@ class ElectreTri():
         self.df_concordancia_b_x = self.df.copy()
         self.df_discordancia_x_b = self.df.copy()
         self.df_discordancia_b_x = self.df.copy()
+
         for a, c in self.df.index:
             self.df.at[(a, c)] = self.dados.loc[c] - self.dados.loc[a]
 
         for (x, b), g in product(self.df_concordancia_b_x.index,
                                  self.df_concordancia_b_x.columns):
             self.df_concordancia_x_b.at[(x, b), g] = self.concordancia_parcial(
-                self.dados[g], xi=x, bh=b, w=self.dados.loc['w'])
+                self.dados[g], xi=x, bh=b)
             self.df_concordancia_b_x.at[(x, b), g] = self.concordancia_parcial(
-                self.dados[g], xi=b, bh=x, w=self.dados.loc['w'])
+                self.dados[g], xi=b, bh=x)
 
         for (x, b), g in product(self.df_discordancia_x_b.index,
                                  self.df_discordancia_x_b.columns):
@@ -154,9 +158,9 @@ class ElectreTri():
                                                                bh=x)
 
         self.df_concordancia_x_b['c(x,b)'] = self.df_concordancia_x_b.apply(
-            np.mean, axis=1)
+            self.concordancia_global, axis=1)
         self.df_concordancia_b_x['c(b,x)'] = self.df_concordancia_b_x.apply(
-            np.mean, axis=1)
+            self.concordancia_global, axis=1)
 
         self.df_credibilidade_b_x = pd.concat(
             [self.df_discordancia_b_x, self.df_concordancia_b_x['c(b,x)']],

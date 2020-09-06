@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block container %}
+
+<h1>Projeto {{projeto_nome}}</h1>
+<hr>
+
+<div class="d-flex justify-content-center">
+    <form id="MyForm" method="post">
+         {% csrf_token %}
+        <h1>Parâmetros do projeto</h1>
+        <table id="decisor_form_set">
+            <tbody>
+                {% for form in forms %}
+                <tr>
+                  
+                   <td class="ml-8"></td>
+                   <td class="ml-8">{{ form.criterio.label }}</td>
+                   <td class="ml-8">{{ form.p.label }}</td>
+                   <td class="ml-8">{{ form.q.label }}</td>
+                   <td class="ml-8">{{ form.v.label }}</td>
+                </tr>
+                <tr>
+                   <td class="ml-8">{{ form.projeto }}</td>
+                   <td class="ml-8">{{ form.criterio }}</td>
+                   <td class="ml-8">{{ form.p }}</td>
+                   <td class="ml-8">{{ form.q }}</td>
+                   <td class="ml-8">{{ form.v }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ forms.management_form }}
+
+        <input type="submit" class="btn btn-outline-primary" value="Avaliar Projeto">
+    </form>
+</div>
+
+{% endblock %}
+
+<!--{% block custom_js %}-->
+<!--<script type="text/javascript">-->
+    <!--$(function() {-->
+       <!--$('#decisor_form_set tbody tr').formset({-->
+       <!--prefix: '{{ decisor_form_set.prefix }}',-->
+       <!--formCssClass: 'dynamic-formset1'-->
+    <!--});-->
+    <!--});-->
+    <!--$(function() {-->
+        <!--$('#criterio_form_set tbody tr').formset({-->
+       <!--prefix: '{{ criterio_form_set.prefix }}',-->
+       <!--formCssClass: 'dynamic-formset2'-->
+    <!--});-->
+    <!--});-->
+    <!--$(function() {-->
+        <!--$('#alternativa_form_set tbody tr').formset({-->
+       <!--prefix: '{{ alternativa_form_set.prefix }}',-->
+       <!--formCssClass: 'dynamic-formset3'-->
+    <!--});-->
+    <!--});-->
+<!--</script>-->
+<!--{% endblock %}-->

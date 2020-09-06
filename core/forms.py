@@ -27,13 +27,28 @@ class ProjetoForm(forms.ModelForm):
 class AlternativaForm(forms.ModelForm):
     class Meta:
         model = Alternativa
-        fields = (
-            'nome',
-            # 'imagem'
-        )
+        fields = ('nome', )
 
 
 class CriterioForm(forms.ModelForm):
     class Meta:
         model = Criterio
         fields = ('nome', 'numerico')
+
+
+class AlternativaCriterioForm(forms.ModelForm):
+    class Meta:
+        model = AlternativaCriterio
+        fields = ('alternativa', 'criterio', 'nota')
+
+
+class DecisorCriterioParametroForm(forms.ModelForm):
+    """description"""
+    class Meta:
+        model = DecisorCriterioParametro
+        fields = 'projeto', 'criterio', 'p', 'q', 'v'
+        widgets = {
+            'projeto': forms.HiddenInput(),
+            # 'decisor': forms.Select(attrs={'readonly': 'readonly'}),
+            # 'criterio': forms.Select(attrs={'readonly': 'readonly'})
+        }
