@@ -10,11 +10,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render, reverse
 
 from core.forms import (AlternativaCriterioForm, AlternativaForm, CriterioForm,
-                        DecisorCriterioParametroForm, DecisorForm,
-                        NomeProjetoForm)
+                        CriterioNumericoForm, DecisorCriterioParametroForm,
+                        DecisorForm, NomeProjetoForm)
 from core.models import (Alternativa, AlternativaCriterio,
                          AvaliacaoAlternativas, AvaliacaoCriterios, Criterio,
-                         Decisor, DecisorCriterioParametro, Projeto)
+                         CriterioNumerico, Decisor, DecisorCriterioParametro,
+                         Projeto)
 
 from .ElectreTri import ElectreTri
 from .method import MatrizProjeto
@@ -85,12 +86,14 @@ def cadastradecisores(request, projeto_id):
     projeto_nome = projeto.nome
     decisoresformset = formset_factory(form=DecisorForm)
     criteriosformset = formset_factory(form=CriterioForm)
+    criteriosnumericosformset = formset_factory(form=CriterioNumericoForm)
     alternativasformset = formset_factory(form=AlternativaForm)
 
     if request.method == 'POST':
-        decisor_form_set, criterios_form_set, alternativa_form_set = \
+        decisor_form_set, criterios_form_set, alternativa_form_set, criterio_numerico_form_set = \
             decisoresformset(request.POST, prefix='decform'), criteriosformset(request.POST, prefix='critform'),\
-            alternativasformset(request.POST, prefix='altform')
+            alternativasformset(request.POST, prefix='altform'), criteriosnumericosformset(
+                request.POST, prefix='critnumform')
         if decisor_form_set.is_valid():
             for decisor_form in decisor_form_set:
                 if decisor_form.is_valid():
@@ -109,18 +112,27 @@ def cadastradecisores(request, projeto_id):
                     criterio_novo = criterio_form.save()
                     criterio_novo.projeto = projeto
                     criterio_novo.save()
+        if criterio_numerico_form_set.is_valid():
+            for criterio_form in criterio_numerico_form_set:
+                if criterio_form.is_valid():
+                    criterio_novo = criterio_form.save()
+                    criterio_novo.projeto = projeto
+                    criterio_novo.save()
         return redirect('avaliarcriterios', projeto_id=projeto.id)
 
     else:
         decisor_form_set = decisoresformset(prefix='decform')
         criterio_form_set = criteriosformset(prefix='critform')
         alternativa_form_set = alternativasformset(prefix='altform')
+        criterio_numerico_form_set = criteriosnumericosformset(
+            prefix='critnumform')
 
     return render(
         request, template_name, {
             'decisor_form_set': decisor_form_set,
             'criterio_form_set': criterio_form_set,
             'alternativa_form_set': alternativa_form_set,
+            'criterio_numerico_form_set': criterio_numerico_form_set,
             'projeto_nome': projeto_nome,
             'projeto_id': projeto_id
         })
@@ -134,10 +146,14 @@ def avaliarcriterios(request, projeto_id):
     projeto_id = projeto_id
     projeto = Projeto.objects.get(id=projeto_id)
     decisores = Decisor.objects.filter(projeto=projeto_id)
-    criterios = Criterio.objects.filter(projeto=projeto_id)
+    criterios = list(Criterio.objects.filter(projeto=projeto_id))
+    criteriosQuanti = list(CriterioNumerico.objects.filter(projeto=projeto_id))
     alternativas = Alternativa.objects.filter(projeto=projeto_id)
+    lista_criterios = criterios + criteriosQuanti
+    print(lista_criterios)
+    print(criterios, criteriosQuanti)
 
-    criterios_combinados = list(combinations(criterios, 2))
+    criterios_combinados = list(combinations(lista_criterios, 2))
 
     if request.method == 'POST':
         campos = dict(request.POST)
@@ -187,13 +203,14 @@ def parametroCriterio(request, projeto_id):
     template_name = 'parametro_criterio.html'
     projeto = Projeto.objects.get(id=projeto_id)
     decisores = Decisor.objects.filter(projeto=projeto_id)
-    criterios = Criterio.objects.filter(projeto=projeto_id)
-    alternativas = Alternativa.objects.filter(projeto=projeto_id)
+    criterios = list(Criterio.objects.filter(projeto=projeto_id))
+    criteriosQuanti = list(CriterioNumerico.objects.filter(projeto=projeto_id))
+    lista_criterios = criterios + criteriosQuanti
     formset = formset_factory(form=DecisorCriterioParametroForm, extra=0)
     forms = formset(initial=[{
         'projeto': projeto,
         'criterio': criterio
-    } for criterio in criterios])
+    } for criterio in lista_criterios])
 
     if request.method == 'POST':
         forms = formset(request.POST)
@@ -217,7 +234,7 @@ def avaliaralternativas(request, projeto_id):
     projeto_id = projeto_id
     projeto = Projeto.objects.get(id=projeto_id)
     decisores = Decisor.objects.filter(projeto=projeto_id)
-    criterios = Criterio.objects.filter(projeto=projeto_id, numerico=False)
+    criterios = Criterio.objects.filter(projeto=projeto_id)
     alternativas = Alternativa.objects.filter(projeto=projeto_id)
 
     alternativas_combinadas = list(combinations(alternativas, 2))

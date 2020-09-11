@@ -33,7 +33,12 @@ class AlternativaForm(forms.ModelForm):
 class CriterioForm(forms.ModelForm):
     class Meta:
         model = Criterio
-        fields = ('nome', 'numerico')
+        fields = ('nome', )
+
+class CriterioNumericoForm(forms.ModelForm):
+    class Meta:
+        model = CriterioNumerico
+        fields = ('nome', 'monotonico')
 
 
 class AlternativaCriterioForm(forms.ModelForm):

@@ -32,7 +32,16 @@ class Alternativa(models.Model):
 class Criterio(models.Model):
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
     nome = models.CharField(max_length=20)
-    numerico = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.nome
+
+
+class CriterioNumerico(models.Model):
+    escolhas = ((1, "lucro"), (2, "custo"))
+    projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
+    nome = models.CharField(max_length=20)
+    monotonico = models.IntegerField(choices=escolhas)
 
     def __str__(self):
         return self.nome
