@@ -7,41 +7,6 @@
 <h3>Resultado detalhado</br>
 </h3>
 
-<!--{% for tabela in avaliacoes_criterios %}-->
-<!--<div class="m-0 p-0 container">-->
-<!--<div class="m-0 p-0 row justify-content-center">-->
-<!--<h2>{{ tabela.0 }}</h2>-->
-<!--</div>-->
-<!--<div class="m-0 p-0 row justify-content-center">-->
-<!--{% autoescape off %}-->
-
-    <!--{{ tabela.1 }}-->
-
-<!--{% endautoescape %}-->
-<!--</div>-->
-<!--</div>-->
-<!--{% endfor %}-->
-
-<!--{% if avaliacoes_alternativas %}-->
-<!--{% for tabela in avaliacoes_alternativas %}-->
-<!--<div class="m-0 p-0 container">-->
-<!--<div class="row justify-content-center-md-around justify-content-center">-->
-<!--<h2 class="p-0 m-0">{{ tabela.0 }}</h2>-->
-<!--</div>-->
-<!--<div class="row justify-content-center-md-around justify-content-center">-->
-<!--<h3 class="p-0 m-0">{{ tabela.1 }}</h3>-->
-<!--</div>-->
-<!--<br>-->
-<!--<div class="row justify-content-center-md-around justify-content-center">-->
-<!--{% autoescape off %}-->
-
-    <!--{{ tabela.2 }}-->
-
-<!--{% endautoescape %}-->
-<!--</div>-->
-<!--</div>-->
-<!--{% endfor %}-->
-<!--{% endif %}-->
 <div class="m-0 p-0 container">
   <h3>Avaliação dos Critérios</h3>
 <div class="m-0 p-0 row justify-content-center">
@@ -81,6 +46,18 @@
 <div class="m-0 p-0 row justify-content-center">
 {% autoescape off %}
 {{ pontuacao_alternativas }}
+{% endautoescape %}
+</div>
+</div>
+{% endif %}
+
+
+{% if pontuacao_alternativas %}
+<div class="m-0 p-0 container">
+<h1>Pontuação alternativas</h1>
+<div class="m-0 p-0 row justify-content-center">
+{% autoescape off %}
+{{ valores }}
 {% endautoescape %}
 </div>
 </div>

@@ -6,7 +6,8 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
 from core.models import (Alternativa, AvaliacaoAlternativas,
-                         AvaliacaoCriterios, Criterio, Decisor, Projeto)
+                         AvaliacaoCriterios, Criterio, CriterioNumerico,
+                         Decisor, Projeto)
 
 warnings.filterwarnings('ignore')
 
@@ -19,8 +20,8 @@ class MatrizProjeto:
         self.decisores = Decisor.objects.filter(projeto=self.projeto)
         self.criterios = Criterio.objects.filter(projeto=self.projeto)
         self.alternativas = Alternativa.objects.filter(projeto=self.projeto)
-        self.criterios_quali = self.criterios.filter(numerico=False)
-        self.criterios_quant = self.criterios.filter(numerico=True)
+        self.criterios_quali = self.criterios
+        self.criterios_quant = CriterioNumerico.filter(projeto=self.projeto)
         self.avaliacoes_criterios = AvaliacaoCriterios.objects.filter(
             projeto=self.projeto)
         self.avaliacoes_alternativas = AvaliacaoAlternativas.objects.filter(

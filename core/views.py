@@ -10,12 +10,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render, reverse
 
 from core.forms import (AlternativaCriterioForm, AlternativaForm, CriterioForm,
-                        CriterioNumericoForm, DecisorCriterioParametroForm,
-                        DecisorForm, NomeProjetoForm)
+                        CriterioNumericoForm, CriterioNumericoParametroForm,
+                        CriterioParametroForm, DecisorForm, NomeProjetoForm)
 from core.models import (Alternativa, AlternativaCriterio,
                          AvaliacaoAlternativas, AvaliacaoCriterios, Criterio,
-                         CriterioNumerico, Decisor, DecisorCriterioParametro,
-                         Projeto)
+                         CriterioNumerico, CriterioNumericoParametro,
+                         CriterioParametro, Decisor, Projeto)
 
 from .ElectreTri import ElectreTri
 from .method import MatrizProjeto
@@ -118,7 +118,7 @@ def cadastradecisores(request, projeto_id):
                     criterio_novo = criterio_form.save()
                     criterio_novo.projeto = projeto
                     criterio_novo.save()
-        return redirect('avaliarcriterios', projeto_id=projeto.id)
+        return redirect('alternativacriterio', projeto_id=projeto.id)
 
     else:
         decisor_form_set = decisoresformset(prefix='decform')
@@ -134,6 +134,39 @@ def cadastradecisores(request, projeto_id):
             'alternativa_form_set': alternativa_form_set,
             'criterio_numerico_form_set': criterio_numerico_form_set,
             'projeto_nome': projeto_nome,
+            'projeto_id': projeto_id
+        })
+
+
+def alternativacriterio(request, projeto_id):
+    projeto = Projeto.objects.get(id=projeto_id)
+    template_name = 'alternativacriterio.html'
+    alternativas = list(Alternativa.objects.filter(projeto=projeto))
+    criterios = list(CriterioNumerico.objects.filter(projeto=projeto))
+    combinacoes = list(product(alternativas, criterios))
+    formset = formset_factory(form=AlternativaCriterioForm, extra=0)
+    forms = formset(initial=[{
+        'projeto': projeto,
+        'criterio': criterio,
+        'alternativa': alternativa
+    } for (alternativa, criterio) in combinacoes])
+
+    if request.method == 'POST':
+        alternativa_criterio_formset = formset(request.POST)
+        if alternativa_criterio_formset.is_valid():
+            for altcritform in alternativa_criterio_formset:
+                if altcritform.is_valid():
+                    altcrit = altcritform.save()
+                    altcrit.projeto = projeto
+                    altcrit.save()
+        return redirect('avaliarcriterios', projeto_id=projeto.id)
+
+    else:
+        alternativa_criterio_formset = formset()
+
+        return render(request, template_name, {
+            'forms': forms,
+            'projeto_nome': projeto.nome,
             'projeto_id': projeto_id
         })
 
@@ -200,6 +233,9 @@ def parametroCriterio(request, projeto_id):
     '''
     View para avaliar as alternativas cadastradas.
     '''
+    # TODO: criterio formulários para critério numérico x parametro
+    # formsets diferentes para quali e numerico e concatenar um abaixo do outro
+    # tanto os formularios quanto os resultados (view resultado)
     template_name = 'parametro_criterio.html'
     projeto = Projeto.objects.get(id=projeto_id)
     decisores = Decisor.objects.filter(projeto=projeto_id)
@@ -297,6 +333,8 @@ def resultado(request, projeto_id):
     pesos = matriz.pesos_criterios
     pesos.sort_values(by='peso', ascending=False, inplace=True)
     pesos = pesos.to_html(index=False)
+    valores = AlternativaCriterio.filter(projeto=projeto)
+    valores = valores.to_dataframe().to_html()
 
     if alternativas:
         df_alternativas = matriz.avaliacoes['alternativas'].to_html()
@@ -335,6 +373,7 @@ def resultado(request, projeto_id):
             'projeto': projeto,
             'pesos': pesos,
             'pontuacao_alternativas': pontuacao_alternativas,
+            'valores': valores,
             'df_alternativas': df_alternativas,
             'df_criterios': df_criterios,
         })
