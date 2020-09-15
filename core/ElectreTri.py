@@ -97,7 +97,6 @@ class ElectreTri():
             return resposta
 
     def concordancia_global(self, serie):
-        print(self.parametros)
         W = self.parametros.loc['w', :]
         resposta = sum(serie.values * W.values) / sum(W.values)
         return resposta

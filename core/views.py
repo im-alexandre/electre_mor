@@ -5,15 +5,15 @@ import zipfile
 from itertools import combinations, permutations, product
 
 import pandas as pd
+from django.forms import formset_factory
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect, render, reverse
 
 from core.forms import (AlternativaCriterioForm, AlternativaForm, CriterioForm,
                         CriterioParametroForm, DecisorForm, NomeProjetoForm)
 from core.models import (Alternativa, AlternativaCriterio,
                          AvaliacaoAlternativas, AvaliacaoCriterios, Criterio,
                          CriterioParametro, Decisor, Projeto)
-from django.forms import formset_factory
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect, render, reverse
 
 from .ElectreTri import ElectreTri
 from .method import MatrizProjeto
@@ -306,6 +306,10 @@ def avaliaralternativas(request, projeto_id):
 def resultado(request, projeto_id):
     template_name = 'resultado.html'
     projeto = Projeto.objects.get(id=projeto_id)
+    criterios_custo = list(Criterio.objects.filter(projeto=projeto,
+                                                   numerico=True,
+                                                   monotonico='2'))
+    criterios_custo = [criterio.nome for criterio in criterios_custo]
     parametros = CriterioParametro.objects.filter(projeto=projeto)
     alternativas = Alternativa.objects.filter(projeto=projeto_id)
     matriz = MatrizProjeto(projeto)
@@ -320,6 +324,11 @@ def resultado(request, projeto_id):
     if alternativas:
         df_alternativas = matriz.avaliacoes['alternativas'].to_html()
         pontuacao_alternativas = matriz.pontuacao_alternativas
+
+        for criterio in criterios_custo:
+            pontuacao_alternativas[criterio] = pontuacao_alternativas[criterio] * -1
+        print(pontuacao_alternativas)
+
         parametros = pd.DataFrame(None,
                                   index='p q v w'.split(),
                                   columns=matriz.pesos_criterios['Critério'])
@@ -343,11 +352,13 @@ def resultado(request, projeto_id):
         electre.renderizar()
         electre.renderizar()
 
-        # pontuacao_alternativas.sort_values(by='pontuacao',ascending=False,inplace=True)
+        for criterio in criterios_custo:
+            pontuacao_alternativas[criterio] = pontuacao_alternativas[criterio] * -1
         pontuacao_alternativas = pontuacao_alternativas.to_html()
 
     else:
         pontuacao_alternativas = None
+        df_alternativas = None
 
     return render(
         request, template_name, {
