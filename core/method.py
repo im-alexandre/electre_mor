@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-from core.models import (Alternativa, AvaliacaoAlternativas,
-                         AvaliacaoCriterios, Criterio, CriterioNumerico,
+from core.models import (Alternativa, AlternativaCriterio,
+                         AvaliacaoAlternativas, AvaliacaoCriterios, Criterio,
                          Decisor, Projeto)
 
 warnings.filterwarnings('ignore')
@@ -20,11 +20,11 @@ class MatrizProjeto:
         self.decisores = Decisor.objects.filter(projeto=self.projeto)
         self.criterios = Criterio.objects.filter(projeto=self.projeto)
         self.alternativas = Alternativa.objects.filter(projeto=self.projeto)
-        self.criterios_quali = self.criterios
-        self.criterios_quant = CriterioNumerico.filter(projeto=self.projeto)
         self.avaliacoes_criterios = AvaliacaoCriterios.objects.filter(
             projeto=self.projeto)
         self.avaliacoes_alternativas = AvaliacaoAlternativas.objects.filter(
+            projeto=self.projeto)
+        self.alternativas_criterios = AlternativaCriterio.objects.filter(
             projeto=self.projeto)
 
     @property
@@ -111,4 +111,13 @@ class MatrizProjeto:
         pontuacao = pontuacao['Normalized Vector']
         pontuacao.index.rename('Alternativa', inplace=True)
         pontuacao.columns.rename('Critério', inplace=True)
+
+        df_alt_crit = self.alternativas_criterios.to_pivot_table(
+            values='nota', rows='alternativa', cols='criterio')
+
+        pontuacao = pd.concat([
+            pontuacao,
+            df_alt_crit,
+        ], axis=1)
+
         return pontuacao

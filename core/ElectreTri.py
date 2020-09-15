@@ -176,8 +176,6 @@ class ElectreTri():
             'cred(x,b)'] = self.df_credibilidade_x_b.apply(self.credibilidade,
                                                            axis=1)
 
-        ordenacao = pd.concat([self.entrada, self.cla_df])
-
         self.credibilidade_df = pd.concat([
             self.df_credibilidade_x_b['cred(x,b)'],
             self.df_credibilidade_b_x['cred(b,x)']

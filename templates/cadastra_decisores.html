@@ -30,30 +30,15 @@
                 <td class="ml-8">{{ form.nome }}</td>
                 <td class="ml-8">{{ form.numerico.label }}</td>
                 <td class="ml-8">{{ form.numerico }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        {{ criterio_form_set.management_form }}
-
-        <hr>
-
-        <h1>Critérios Numéricos</h1>
-        <table id="criterio_numerico_form_set">
-            <tbody>
-            {% for form in criterio_numerico_form_set.forms %}
-            <tr>
-                <td class="ml-8">{{ form.nome.label }}</td>
-                <td class="ml-8">{{ form.nome }}</td>
                 <td class="ml-8">{{ form.monotonico.label }}</td>
                 <td class="ml-8">{{ form.monotonico }}</td>
             </tr>
             {% endfor %}
             </tbody>
         </table>
-        {{ criterio_numerico_form_set.management_form }}
+        {{ criterio_form_set.management_form }}
 
-        <hr>
+
         <h1>Alternativas</h1>
         <table id="alternativa_form_set">
             <tbody>

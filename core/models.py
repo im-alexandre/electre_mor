@@ -30,19 +30,12 @@ class Alternativa(models.Model):
 
 
 class Criterio(models.Model):
-    projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
-    nome = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.nome
-
-
-class CriterioNumerico(models.Model):
 
     escolhas = ((1, "lucro"), (2, "custo"))
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
     nome = models.CharField(max_length=20)
-    monotonico = models.IntegerField(choices=escolhas)
+    numerico = models.BooleanField(default=False)
+    monotonico = models.IntegerField(choices=escolhas, default=1)
 
     def __str__(self):
         return self.nome
@@ -78,7 +71,7 @@ class AvaliacaoAlternativas(models.Model):
 
 class AlternativaCriterio(models.Model):
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE)
-    criterio = models.ForeignKey('CriterioNumerico',
+    criterio = models.ForeignKey('Criterio',
                                  on_delete=models.CASCADE,
                                  related_name='criterio')
     alternativa = models.ForeignKey('Alternativa',
@@ -93,16 +86,6 @@ class AlternativaCriterio(models.Model):
 class CriterioParametro(models.Model):
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE)
     criterio = models.ForeignKey('Criterio', on_delete=models.CASCADE)
-    p = models.FloatField()
-    q = models.FloatField()
-    v = models.FloatField()
-
-    objects = DataFrameManager()
-
-
-class CriterioNumericoParametro(models.Model):
-    projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE)
-    criterio = models.ForeignKey('CriterioNumerico', on_delete=models.CASCADE)
     p = models.FloatField()
     q = models.FloatField()
     v = models.FloatField()

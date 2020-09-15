@@ -10,7 +10,26 @@
         <h1>Parâmetros do projeto</h1>
         <table id="decisor_form_set">
             <tbody>
-                {% for form in forms %}
+                {% for form in formsQuali %}
+                <tr>
+                  
+                   <td class="ml-8"></td>
+                   <td class="ml-8">{{ form.criterio.label }}</td>
+                   <td class="ml-8">{{ form.p.label }}</td>
+                   <td class="ml-8">{{ form.q.label }}</td>
+                   <td class="ml-8">{{ form.v.label }}</td>
+                </tr>
+                <tr>
+                   <td class="ml-8">{{ form.projeto }}</td>
+                   <td class="ml-8">{{ form.criterio }}</td>
+                   <td class="ml-8">{{ form.p }}</td>
+                   <td class="ml-8">{{ form.q }}</td>
+                   <td class="ml-8">{{ form.v }}</td>
+                </tr>
+                {% endfor %}
+        {{ formsQuali.management_form }}
+
+                {% for form in formsQuanti %}
                 <tr>
                   
                    <td class="ml-8"></td>
@@ -29,7 +48,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        {{ forms.management_form }}
+        {{ formsQuanti.management_form }}
 
         <input type="submit" class="btn btn-outline-primary" value="Avaliar Projeto">
     </form>

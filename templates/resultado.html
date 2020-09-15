@@ -51,18 +51,6 @@
 </div>
 {% endif %}
 
-
-{% if pontuacao_alternativas %}
-<div class="m-0 p-0 container">
-<h1>Pontuação alternativas</h1>
-<div class="m-0 p-0 row justify-content-center">
-{% autoescape off %}
-{{ valores }}
-{% endautoescape %}
-</div>
-</div>
-{% endif %}
-
 <a href="{% url 'download_file' %}" class="btn btn-warning btn-lg btn-block">Baixar Planilha</a>
 
 
