@@ -4,29 +4,29 @@
 <h1>Resultado do projeto "{{projeto.nome}}"</h1>
 
 <hr>
-<h3>Resultado detalhado</br>
-</h3>
+{% comment %}<h3>Resultado detalhado</br>{% endcomment %}
+{% comment %}</h3>{% endcomment %}
 
-<div class="m-0 p-0 container">
-  <h3>Avaliação dos Critérios</h3>
-<div class="m-0 p-0 row justify-content-center">
-{% autoescape off %}
+{% comment %}<div class="m-0 p-0 container">{% endcomment %}
+  {% comment %}<h3>Avaliação dos Critérios</h3>{% endcomment %}
+{% comment %}<div class="m-0 p-0 row justify-content-center">{% endcomment %}
+{% comment %}{% autoescape off %}{% endcomment %}
 
-{{ df_criterios }}
-{% endautoescape %}
-</div>
-</div>
+{% comment %}{{ df_criterios }}{% endcomment %}
+{% comment %}{% endautoescape %}{% endcomment %}
+{% comment %}</div>{% endcomment %}
+{% comment %}</div>{% endcomment %}
 
-<div class="m-0 p-0 container">
-  <h3>Avaliação das alternativas</h3>
-<div class="m-0 p-0 row justify-content-center">
-{% autoescape off %}
+{% comment %}<div class="m-0 p-0 container">{% endcomment %}
+  {% comment %}<h3>Avaliação das alternativas</h3>{% endcomment %}
+{% comment %}<div class="m-0 p-0 row justify-content-center">{% endcomment %}
+{% comment %}{% autoescape off %}{% endcomment %}
 
-{{ df_alternativas }}
-{% endautoescape %}
+{% comment %}{{ df_alternativas }}{% endcomment %}
+{% comment %}{% endautoescape %}{% endcomment %}
 
-</div>
-</div>
+{% comment %}</div>{% endcomment %}
+{% comment %}</div>{% endcomment %}
 
 
 {% if pesos %}
@@ -51,7 +51,21 @@
 </div>
 {% endif %}
 
-<a href="{% url 'download_file' %}" class="btn btn-warning btn-lg btn-block">Baixar Planilha</a>
+
+<div class="m-0 p-0 container">
+  <h3>Classificação das alternativas</h3>
+<div class="m-0 p-0 row justify-content-center">
+{% autoescape off %}
+
+{{ df_cla }}
+{% endautoescape %}
+
+</div>
+</div>
+
+<br>
+
+<a href="{% url 'download_file' %}" class="btn btn-primary btn-lg btn-block">Baixar Resultado Detalhado</a>
 
 
 {% endblock %}

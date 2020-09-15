@@ -199,8 +199,8 @@ class ElectreTri():
         self.df_credibilidade_b_x.to_excel(tab, 'credibilidade_b_x')
         self.df_credibilidade_x_b.to_excel(tab, 'credibilidade_x_b')
         self.credibilidade_df.to_excel(tab, 'classificações')
-
         tab.save()
+        return self.credibilidade_df
 
 
 if __name__ == '__main__':
