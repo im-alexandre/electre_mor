@@ -1,6 +1,5 @@
-from django import forms
-
 from core.models import *
+from django import forms
 
 
 class NomeProjetoForm(forms.ModelForm):
@@ -10,6 +9,7 @@ class NomeProjetoForm(forms.ModelForm):
             'nome',
             'descricao',
             'qtde_classes',
+            'lamb',
         )
 
 
@@ -17,7 +17,6 @@ class DecisorForm(forms.ModelForm):
     class Meta:
         model = Decisor
         fields = ('nome', )
-
 
 
 class AlternativaForm(forms.ModelForm):

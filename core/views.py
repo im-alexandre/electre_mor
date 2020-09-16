@@ -5,15 +5,15 @@ import zipfile
 from itertools import combinations, permutations, product
 
 import pandas as pd
-from django.forms import formset_factory
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect, render, reverse
 
 from core.forms import (AlternativaCriterioForm, AlternativaForm, CriterioForm,
                         CriterioParametroForm, DecisorForm, NomeProjetoForm)
 from core.models import (Alternativa, AlternativaCriterio,
                          AvaliacaoAlternativas, AvaliacaoCriterios, Criterio,
                          CriterioParametro, Decisor, Projeto)
+from django.forms import formset_factory
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect, render, reverse
 
 from .ElectreTri import ElectreTri
 from .method import MatrizProjeto
@@ -338,18 +338,16 @@ def resultado_sapevo(request, projeto_id):
                 form.save()
         return redirect('resultado', projeto_id)
 
-
-    return render(request,
-                  'resultado_sapevo.html',
-                  {
-                      'projeto': projeto,
-                      'pesos': pesos,
-                      'pontuacao_alternativas': pontuacao_alternativas,
-                      'valores': valores,
-                      'df_alternativas': df_alternativas,
-                      'df_criterios': df_criterios,
-                      'formsQuali': formsQuali,
-                  })
+    return render(
+        request, 'resultado_sapevo.html', {
+            'projeto': projeto,
+            'pesos': pesos,
+            'pontuacao_alternativas': pontuacao_alternativas,
+            'valores': valores,
+            'df_alternativas': df_alternativas,
+            'df_criterios': df_criterios,
+            'formsQuali': formsQuali,
+        })
 
 
 def resultado(request, projeto_id):
@@ -363,6 +361,7 @@ def resultado(request, projeto_id):
     matriz = MatrizProjeto(projeto)
 
     bn = projeto.qtde_classes
+    lamb = projeto.lamb
 
     pesos = matriz.pesos_criterios
     pesos.sort_values(by='peso', ascending=False, inplace=True)
@@ -388,13 +387,13 @@ def resultado(request, projeto_id):
         parametros.index.rename('parametros')
         electre = ElectreTri(pontuacao_alternativas,
                              parametros,
-                             lamb=0.75,
+                             lamb=lamb,
                              bn=bn,
                              method='quantil')
         df_cla_quantil = electre.renderizar().to_html()
         electre = ElectreTri(pontuacao_alternativas,
                              parametros,
-                             lamb=0.75,
+                             lamb=lamb,
                              bn=bn,
                              method='range')
 

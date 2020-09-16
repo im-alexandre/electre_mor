@@ -15,6 +15,7 @@ class Projeto(models.Model):
     nome = models.CharField(max_length=20)
     descricao = models.TextField(max_length=400, blank=True)
     qtde_classes = models.IntegerField(null=True, default=2)
+    lamb = models.FloatField(null=True, default=0.5)
 
     def __str__(self):
         return self.nome
