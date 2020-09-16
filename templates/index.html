@@ -6,7 +6,22 @@
 
 <form method="post">
     {% csrf_token %}
-    {{nome_projeto_form}}
+    <table>
+            <tbody>
+            <tr>
+                <td class="ml-8">Nome do projeto</td>
+                <td class="ml-8">{{ form.nome }}</td>
+            </tr>
+            <tr>
+                <td class="ml-8">Quantidade de classes do problema</td>
+                <td class="ml-8">{{ form.qtde_classes }}</td>
+            </tr>
+            <tr>
+                <td class="ml-8">Descrição do projeto</td>
+                <td class="ml-8">{{ form.descricao }}</td>
+            </tr>
+            </tbody>
+        </table>
     <input type="submit" class="btn btn-outline-primary" value="Cadastrar">
 </form>
 

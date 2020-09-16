@@ -42,4 +42,7 @@ urlpatterns = [
     path('alternativacriterio/<projeto_id>/',
          views.alternativacriterio,
          name='alternativacriterio'),
+    path('resultadosapevo/<projeto_id>/',
+         views.resultado_sapevo,
+         name='resultadosapevo'),
 ]

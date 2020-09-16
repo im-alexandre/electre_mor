@@ -1,14 +1,39 @@
 {% extends "base.html" %}
 {% block container %}
 
-<h1>Projeto {{projeto_nome}}</h1>
+<h1>Resultado parcial do projeto "{{projeto.nome}}"</h1>
+
 <hr>
+
+
+{% if pesos %}
+<div class="m-0 p-0 container">
+<h1>Pesos totais dos critérios</h1>
+<div class="m-0 p-0 row justify-content-center">
+{% autoescape off %}
+{{ pesos }}
+{% endautoescape %}
+{% endif %}
+</div>
+</div>
+
+{% if pontuacao_alternativas %}
+<div class="m-0 p-0 container">
+<h1>Pontuação alternativas</h1>
+<div class="m-0 p-0 row justify-content-center">
+{% autoescape off %}
+{{ pontuacao_alternativas }}
+{% endautoescape %}
+</div>
+</div>
+{% endif %}
+
 
 <div class="d-flex justify-content-center">
     <form id="MyForm" method="post">
          {% csrf_token %}
         <h1>Parâmetros do projeto</h1>
-        <table id="decisor_form_set">
+        <table>
             <tbody>
                 {% for form in formsQuali %}
                 <tr>
@@ -30,31 +55,9 @@
         {{ formsQuali.management_form }}
         </table>
 
-        <input type="submit" class="btn btn-outline-primary" value="Baixar resultado">
+        <input type="submit" class="btn btn-outline-primary" value="Renderizar Classificação">
     </form>
 </div>
+<br>
 
 {% endblock %}
-
-<!--{% block custom_js %}-->
-<!--<script type="text/javascript">-->
-    <!--$(function() {-->
-       <!--$('#decisor_form_set tbody tr').formset({-->
-       <!--prefix: '{{ decisor_form_set.prefix }}',-->
-       <!--formCssClass: 'dynamic-formset1'-->
-    <!--});-->
-    <!--});-->
-    <!--$(function() {-->
-        <!--$('#criterio_form_set tbody tr').formset({-->
-       <!--prefix: '{{ criterio_form_set.prefix }}',-->
-       <!--formCssClass: 'dynamic-formset2'-->
-    <!--});-->
-    <!--});-->
-    <!--$(function() {-->
-        <!--$('#alternativa_form_set tbody tr').formset({-->
-       <!--prefix: '{{ alternativa_form_set.prefix }}',-->
-       <!--formCssClass: 'dynamic-formset3'-->
-    <!--});-->
-    <!--});-->
-<!--</script>-->
-<!--{% endblock %}-->

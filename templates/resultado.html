@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block container %}
 
-<h1>Resultado do projeto "{{projeto.nome}}"</h1>
+<h1>Classificação do projeto "{{projeto.nome}}"</h1>
 
 <hr>
 {% comment %}<h3>Resultado detalhado</br>{% endcomment %}
@@ -53,19 +53,25 @@
 
 
 <div class="m-0 p-0 container">
-  <h3>Classificação das alternativas</h3>
+  <h3>Classificação das alternativas (Bh)</h3>
 <div class="m-0 p-0 row justify-content-center">
 {% autoescape off %}
-
-{{ df_cla }}
+{{ df_cla_quantil }}
 {% endautoescape %}
+</div>
+</div>
 
+<div class="m-0 p-0 container">
+  <h3>Classificação das alternativas (Bn)</h3>
+<div class="m-0 p-0 row justify-content-center">
+{% autoescape off %}
+{{ df_cla_range }}
+{% endautoescape %}
+<a href="{% url 'download_file' %}" class="btn btn-primary btn-lg btn-block">Baixar Resultado Detalhado</a>
 </div>
 </div>
+  
 
 <br>
-
-<a href="{% url 'download_file' %}" class="btn btn-primary btn-lg btn-block">Baixar Resultado Detalhado</a>
-
 
 {% endblock %}

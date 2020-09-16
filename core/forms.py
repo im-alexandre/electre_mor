@@ -9,6 +9,7 @@ class NomeProjetoForm(forms.ModelForm):
         fields = (
             'nome',
             'descricao',
+            'qtde_classes',
         )
 
 
@@ -17,11 +18,6 @@ class DecisorForm(forms.ModelForm):
         model = Decisor
         fields = ('nome', )
 
-
-class ProjetoForm(forms.ModelForm):
-    class Meta:
-        model = Projeto
-        fields = ('nome', 'decisores')
 
 
 class AlternativaForm(forms.ModelForm):

@@ -14,8 +14,7 @@ class Decisor(models.Model):
 class Projeto(models.Model):
     nome = models.CharField(max_length=20)
     descricao = models.TextField(max_length=400, blank=True)
-    decisores = models.ManyToManyField('Decisor', related_name='+')
-    avaliado = models.BooleanField(default=False, null=True)
+    qtde_classes = models.IntegerField(null=True, default=2)
 
     def __str__(self):
         return self.nome
