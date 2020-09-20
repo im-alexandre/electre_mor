@@ -15,15 +15,16 @@
                   
                    <td class="ml-8"></td>
                    <td class="ml-8">{{ form.criterio.label }}</td>
-                   <td class="ml-8">{{ form.p.label }}</td>
                    <td class="ml-8">{{ form.q.label }}</td>
+                   <td class="ml-8">{{ form.p.label }}</td>
                    <td class="ml-8">{{ form.v.label }}</td>
                 </tr>
                 <tr>
-                   <td class="ml-8">{{ form.projeto }}</td>
+                   <td class="ml-8">{{ form.projeto }}</td> 
+                    <!--campo de projeto tem que ficar hidden-->
                    <td class="ml-8">{{ form.criterio }}</td>
-                   <td class="ml-8">{{ form.p }}</td>
                    <td class="ml-8">{{ form.q }}</td>
+                   <td class="ml-8">{{ form.p }}</td>
                    <td class="ml-8">{{ form.v }}</td>
                 </tr>
                 {% endfor %}
@@ -35,26 +36,3 @@
 </div>
 
 {% endblock %}
-
-<!--{% block custom_js %}-->
-<!--<script type="text/javascript">-->
-    <!--$(function() {-->
-       <!--$('#decisor_form_set tbody tr').formset({-->
-       <!--prefix: '{{ decisor_form_set.prefix }}',-->
-       <!--formCssClass: 'dynamic-formset1'-->
-    <!--});-->
-    <!--});-->
-    <!--$(function() {-->
-        <!--$('#criterio_form_set tbody tr').formset({-->
-       <!--prefix: '{{ criterio_form_set.prefix }}',-->
-       <!--formCssClass: 'dynamic-formset2'-->
-    <!--});-->
-    <!--});-->
-    <!--$(function() {-->
-        <!--$('#alternativa_form_set tbody tr').formset({-->
-       <!--prefix: '{{ alternativa_form_set.prefix }}',-->
-       <!--formCssClass: 'dynamic-formset3'-->
-    <!--});-->
-    <!--});-->
-<!--</script>-->
-<!--{% endblock %}-->
