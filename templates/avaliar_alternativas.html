@@ -1,47 +1,40 @@
 {% extends "base.html" %}
 {% block container %}
 
-<h1>Projeto {{projeto_nome}}</h1>
+      {% include 'partials/passo_a_passo.html' %}
+<h1>Projeto {{projeto.nome}}</h1>
 <hr>
 <h2>Avaliar Alternativas</h2>
 
 <br>
 
-<form method="post">
-  {% csrf_token %}
+    <form method="POST">
+         {% csrf_token %}
+        <h1> numéricos</h1>
+        <table>
+            <tbody>
+                {% for form in forms %}
+                <tr>
+                   <td class="ml-8"></td>
+                   <td class="ml-8"></td>
+                   <td class="ml-8"></td>
+                   <td class="ml-8">Valor</td>
+                   <td class="ml-8"></td>
+                </tr>
+                <tr>
+                   <td class="ml-8">{{ form.projeto }}</td>
+                   <td class="ml-8">{{ form.decisor }}</td>
+                   <td class="ml-8">{{ form.criterio }}</td>
+                   <td class="ml-8">{{ form.alternativaA }}</td>
+                   <td class="ml-8">{{ form.nota }}</td>
+                   <td class="ml-8">{{ form.alternativaB }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ forms.management_form }}
 
-  {% for decisor in decisores %}
-  <div class="decisor">
-    <input type="hidden" name= "decisor_id" value={{decisor.id}}>
-    <h1>{{decisor.nome}}</h1>
-
-
-    {% for criterio in criterios %}
-    <div class="criterio">
-    <input type="hidden" name= "criterio_id" value={{criterio.id}}>
-      <h4>Critério - {{criterio.nome}} - ID => {{criterio.id}}</h4>
-
-      <div id="alternativas">
-        {% for alternativas in alternativas_combinadas %}
-        <div class="alternativa">
-
-          <strong>{{alternativas.0.nome}} VS {{alternativas.1.nome}}</strong>
-          <br>
-          <input type="range" name="({{alternativas.1.id}}, {{alternativas.0.id}})" min=-2 max=2 step=1><br>
-            {% include 'partials/_datalist_range.html' %}
-          <br>
-        </div>
-        {% endfor %}
-      </div>  
-      <hr>
-    </div>
-    {% endfor %}
-  </div>
-  {% endfor %}
-
-  <input type="submit" class="btn btn-outline-primary" value="Avaliar">
-  <hr>
-
-</form>
+        <input type="submit" class="btn btn-outline-primary" value="Salvar valores">
+    </form>
 
 {% endblock %}

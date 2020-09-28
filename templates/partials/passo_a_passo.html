@@ -1,0 +1,26 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav ml-auto">
+      {% url 'cadastradecisores' as current_url %}
+      <li class="nav-item {% if request.get_full_path == current_url %}active{% endif %}">
+          <a class="nav-link" href="{% url 'cadastradecisores' %}/{{ projeto.id }}">cadastradecisores<span class="sr-only">(current)</span></a>
+      </li>
+      {% url 'avaliarcriterios' as current_url %}
+      <li class="nav-item {% if request.get_full_path == current_url %}active{% endif %}">
+        <a class="nav-link" href="{% url 'avaliarcriterios' %}/{{ projeto.id }}">avaliarcriterios<span class="sr-only">(current)</span></a>
+      </li>
+      {% url 'avaliaralternativas' as current_url %}
+      <li class="nav-item {% if request.get_full_path == current_url %}active{% endif %}">
+        <a class="nav-link" href="{% url 'avaliarcriterios' %}/{{ projeto.id }}">avaliaralternativas<span class="sr-only">(current)</span></a>
+      </li>
+      {% url 'alternativacriterio' as current_url %}
+      <li class="nav-item {% if request.get_full_path == current_url %}active{% endif %}">
+        <a class="nav-link" href="{% url 'alternativacriterio' %}/{{ projeto.id }}">alternativacriterio<span class="sr-only">(current)</span></a>
+      </li>
+      {% url 'resultadosapevo' as current_url %}
+      <li class="nav-item {% if request.get_full_path == current_url %}active{% endif %}">
+        <a class="nav-link" href="{% url 'resultadosapevo' %}/{{ projeto.id }}">resultadosapevo<span class="sr-only">(current)</span></a>
+      </li>
+    </ul>
+  </div>
+</nav>

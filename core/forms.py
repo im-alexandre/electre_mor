@@ -1,5 +1,6 @@
-from core.models import *
 from django import forms
+
+from core.models import *
 
 
 class NomeProjetoForm(forms.ModelForm):
@@ -35,6 +36,38 @@ class AlternativaCriterioForm(forms.ModelForm):
     class Meta:
         model = AlternativaCriterio
         fields = ('projeto', 'alternativa', 'criterio', 'nota')
+
+
+class AvaliacaoCriteriosForm(forms.ModelForm):
+    """description"""
+    class Meta:
+        model = AvaliacaoCriterios
+        fields = ('projeto', 'decisor', 'criterioA', 'criterioB', 'nota')
+        widgets = {
+            'nota':
+            forms.TextInput(attrs={
+                'type': 'range',
+                'min': -2,
+                'max': 2,
+                'step': 1
+            })
+        }
+
+
+class AvaliacaoAlternativasForm(forms.ModelForm):
+    class Meta:
+        model = AvaliacaoAlternativas
+        fields = ('projeto', 'decisor', 'criterio', 'alternativaA',
+                  'alternativaB', 'nota')
+        widgets = {
+            'nota':
+            forms.TextInput(attrs={
+                'type': 'range',
+                'min': -2,
+                'max': 2,
+                'step': 1
+            })
+        }
 
 
 class CriterioParametroForm(forms.ModelForm):

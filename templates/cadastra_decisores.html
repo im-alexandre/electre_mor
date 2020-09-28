@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block container %}
 
-<h1>Projeto {{projeto_nome}}</h1>
+
+      {% include 'partials/passo_a_passo.html' %}
+<h1>Projeto {{projeto.nome}}</h1>
 <hr>
 <h2>Cadastrar Decisor</h2>
 

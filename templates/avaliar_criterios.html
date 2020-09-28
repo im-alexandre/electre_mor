@@ -1,33 +1,39 @@
 {% extends "base.html" %}
 {% block container %}
 
-<h1>Projeto {{projeto_nome}}</h1>
+
+      {% include 'partials/passo_a_passo.html' %}
+<h1>Projeto {{projeto.nome}}</h1>
 <hr>
-<h2>Avaliar Critérios</h2>
 
-<br>
+<div class="d-flex justify-content-center">
+    <form method="POST">
+         {% csrf_token %}
+        <h1> numéricos</h1>
+        <table>
+            <tbody>
+                {% for form in forms %}
+                <tr>
+                   <td class="ml-8"></td>
+                   <td class="ml-8"></td>
+                   <td class="ml-8"></td>
+                   <td class="ml-8">Valor</td>
+                   <td class="ml-8"></td>
+                </tr>
+                <tr>
+                   <td class="ml-8">{{ form.projeto }}</td>
+                   <td class="ml-8">{{ form.decisor }}</td>
+                   <td class="ml-8">{{ form.criterioA }}</td>
+                   <td class="ml-8">{{ form.nota }}</td>
+                   <td class="ml-8">{{ form.criterioB }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ forms.management_form }}
 
-<form method="post">
-  {% csrf_token %}
-  {% for decisor in decisores %}
-  <div class="decisor">
-    <input type="hidden" name= "decisor_id" value={{decisor.id}}>
-    <h1>{{decisor.nome}}</h1>
-
-
-    {% for criterios in criterios_combinados %}
-    <div id="criterio">
-      <strong>{{criterios.0.nome}} VS {{criterios.1.nome}}</strong>
-      <br>
-      <input type="range" name="({{criterios.1.id}}, {{criterios.0.id}})" min=-2 max=2 step=1><br>
-      
-      {% endfor %}
-      {% endfor %}
-    </div>  
-    <hr>
-  </div>
-
-  <input type="submit" class="btn btn-outline-primary" value="Avaliar">
-</form>
+        <input type="submit" class="btn btn-outline-primary" value="Salvar valores">
+    </form>
+</div>
 
 {% endblock %}

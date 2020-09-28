@@ -5,15 +5,17 @@ import zipfile
 from itertools import combinations, permutations, product
 
 import pandas as pd
+from django.forms import formset_factory
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect, render, reverse
 
-from core.forms import (AlternativaCriterioForm, AlternativaForm, CriterioForm,
+from core.forms import (AlternativaCriterioForm, AlternativaForm,
+                        AvaliacaoAlternativas, AvaliacaoAlternativasForm,
+                        AvaliacaoCriteriosForm, CriterioForm,
                         CriterioParametroForm, DecisorForm, NomeProjetoForm)
 from core.models import (Alternativa, AlternativaCriterio,
                          AvaliacaoAlternativas, AvaliacaoCriterios, Criterio,
                          CriterioParametro, Decisor, Projeto)
-from django.forms import formset_factory
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect, render, reverse
 
 from .ElectreTri import ElectreTri
 from .method import MatrizProjeto
@@ -89,23 +91,57 @@ def cadastradecisores(request, projeto_id):
     criteriosformset = formset_factory(form=CriterioForm)
     alternativasformset = formset_factory(form=AlternativaForm)
 
+    if request.method == 'GET':
+        if criterios.exists():
+            criterio_form_set = criteriosformset(initial=[{
+                'nome':
+                i.nome,
+                'numerico':
+                i.numerico,
+                'monotonico':
+                i.monotonico,
+            } for i in list(criterios)],
+                prefix='critform')
+        else:
+            criterio_form_set = criteriosformset(prefix='critform')
+
+        if decisores.exists():
+            decisor_form_set = decisoresformset(initial=[{
+                'nome': i.nome,
+            } for i in list(decisores)],
+                prefix='decform')
+        else:
+            decisor_form_set = decisoresformset(prefix='decform')
+
+        if alternativas.exists():
+            alternativa_form_set = alternativasformset(initial=[{
+                'nome': i.nome,
+            } for i in list(alternativas)],
+                prefix='altform')
+        else:
+            alternativa_form_set = alternativasformset(prefix='altform')
+
     if request.method == 'POST':
         decisor_form_set, criterios_form_set, alternativa_form_set = \
-            decisoresformset(request.POST, prefix='decform'), criteriosformset(request.POST, prefix='critform'),\
-            alternativasformset(request.POST, prefix='altform')
-        if decisor_form_set.is_valid() and not decisores.exists():
+            (decisoresformset(request.POST, prefix='decform'),
+             criteriosformset(request.POST, prefix='critform'),
+             alternativasformset(request.POST, prefix='altform'))
+        if decisor_form_set.is_valid():
+            Decisor.objects.filter(projeto=projeto).delete()
             for decisor_form in decisor_form_set:
                 if decisor_form.is_valid():
                     decisor_novo = decisor_form.save()
                     decisor_novo.projeto = projeto
                     decisor_novo.save()
-        if alternativa_form_set.is_valid() and not alternativas.exists():
+        if alternativa_form_set.is_valid():
+            Alternativa.objects.filter(projeto=projeto).delete()
             for alternativa_form in alternativa_form_set:
                 if alternativa_form.is_valid():
                     nova_alternativa = alternativa_form.save()
                     nova_alternativa.projeto = projeto
                     nova_alternativa.save()
-        if criterios_form_set.is_valid() and not criterios.exists():
+        if criterios_form_set.is_valid():
+            Criterio.objects.filter(projeto=projeto).delete()
             for criterio_form in criterios_form_set:
                 if criterio_form.is_valid():
                     criterio_novo = criterio_form.save()
@@ -113,18 +149,12 @@ def cadastradecisores(request, projeto_id):
                     criterio_novo.save()
         return redirect('alternativacriterio', projeto_id=projeto.id)
 
-    else:
-        decisor_form_set = decisoresformset(prefix='decform')
-        criterio_form_set = criteriosformset(prefix='critform')
-        alternativa_form_set = alternativasformset(prefix='altform')
-
     return render(
         request, template_name, {
             'decisor_form_set': decisor_form_set,
             'criterio_form_set': criterio_form_set,
             'alternativa_form_set': alternativa_form_set,
-            'projeto_nome': projeto_nome,
-            'projeto_id': projeto_id
+            'projeto': projeto,
         })
 
 
@@ -134,34 +164,39 @@ def alternativacriterio(request, projeto_id):
     alternativas = list(Alternativa.objects.filter(projeto=projeto))
     criterios = list(Criterio.objects.filter(projeto=projeto, numerico=True))
     combinacoes = list(product(alternativas, criterios))
-    alternativa_criterio_queryset = AlternativaCriterio.objects.filter(
-        projeto=projeto)
+    alternativa_criterio_queryset = list(
+        AlternativaCriterio.objects.filter(projeto=projeto))
     formset = formset_factory(form=AlternativaCriterioForm, extra=0)
-    forms = formset(initial=[{
-        'projeto': projeto,
-        'criterio': criterio,
-        'alternativa': alternativa
-    } for (alternativa, criterio) in combinacoes])
+    if request.method == 'GET':
+        if alternativa_criterio_queryset:
+            forms = formset(initial=[{
+                'projeto': i.projeto,
+                'criterio': i.criterio,
+                'alternativa': i.alternativa,
+                'nota': i.nota
+            } for i in alternativa_criterio_queryset])
+        else:
+            forms = formset(initial=[{
+                'projeto': projeto,
+                'criterio': criterio,
+                'alternativa': alternativa
+            } for (alternativa, criterio) in combinacoes])
+        return render(request, template_name, {
+            'forms': forms,
+            'projeto_nome': projeto.nome,
+            'projeto_id': projeto_id
+        })
 
     if request.method == 'POST':
         alternativa_criterio_formset = formset(request.POST)
-        if alternativa_criterio_formset.is_valid() and not\
-                alternativa_criterio_queryset.exists():
+        if alternativa_criterio_formset.is_valid():
+            AlternativaCriterio.objects.filter(projeto=projeto).delete()
             for altcritform in alternativa_criterio_formset:
                 if altcritform.is_valid():
                     altcrit = altcritform.save()
                     altcrit.projeto = projeto
                     altcrit.save()
         return redirect('avaliarcriterios', projeto_id=projeto.id)
-
-    else:
-        alternativa_criterio_formset = formset()
-
-        return render(request, template_name, {
-            'forms': forms,
-            'projeto_nome': projeto.nome,
-            'projeto_id': projeto_id
-        })
 
 
 def avaliarcriterios(request, projeto_id):
@@ -174,36 +209,47 @@ def avaliarcriterios(request, projeto_id):
     decisores = Decisor.objects.filter(projeto=projeto_id)
     criterios = list(Criterio.objects.filter(projeto=projeto_id))
     alternativas = Alternativa.objects.filter(projeto=projeto_id)
+    avaliacao_criterios_queryset = list(
+        AvaliacaoCriterios.objects.filter(projeto=projeto))
 
     criterios_combinados = list(combinations(criterios, 2))
 
+    formset = formset_factory(form=AvaliacaoCriteriosForm, extra=0)
+
+    if request.method == 'get':
+        if avaliacao_criterios_queryset:
+            forms = formset(initial=[{
+                'projeto': i.projeto,
+                'decisor': i.decisor,
+                'criterioa': i.criterioa,
+                'criteriob': i.criteriob,
+                'nota': i.nota
+            } for i in avaliacao_criterios_queryset])
+        else:
+            forms = formset(initial=[{
+                'projeto': projeto,
+                'decisor': decisor,
+                'criterioA': criterio,
+                'criterioB': alternativa
+            } for decisor, (
+                alternativa,
+                criterio) in product(decisores, criterios_combinados)])
+
     if request.method == 'POST':
-        campos = dict(request.POST)
-        _ = campos.pop('csrfmiddlewaretoken')
-        decisor_id = campos.pop('decisor_id')
+        avaliacao_criterios_formset = formset(request.POST)
+        if avaliacao_criterios_formset.is_valid():
+            AvaliacaoCriterios.objects.filter(projeto=projeto).delete()
+            for aval_crit in avaliacao_criterios_formset:
+                if aval_crit.is_valid():
+                    avalcrit = aval_crit.save()
+                    avalcrit.nota = int(avalcrit.nota)
+                    avalcrit.save()
+                    avalcrit.pk = None
+                    avalcrit.criterioA, avalcrit.criterioB = \
+                        avalcrit.criterioB, avalcrit.criterioA
+                    avalcrit.nota = -avalcrit.nota
+                    avalcrit.save()
 
-        notas_avaliadores = dict()
-        for key, value in campos.items():
-            tuplas = list(zip(decisor_id, value))
-            notas_avaliadores[eval(key)] = tuplas
-
-        for (criterioA, criterioB), avaliacoes in notas_avaliadores.items():
-            for (avaliador, nota) in avaliacoes:
-                decisor = Decisor.objects.get(id=int(avaliador))
-                criterio1 = Criterio.objects.get(id=criterioA)
-                criterio2 = Criterio.objects.get(id=criterioB)
-                avaliacao = AvaliacaoCriterios(projeto=projeto,
-                                               decisor=decisor,
-                                               criterioA=criterio1,
-                                               criterioB=criterio2,
-                                               nota=int(nota))
-                avaliacao.save()
-                avaliacao = AvaliacaoCriterios(projeto=projeto,
-                                               decisor=decisor,
-                                               criterioA=criterio2,
-                                               criterioB=criterio1,
-                                               nota=-int(nota))
-                avaliacao.save()
         if len(alternativas) > 1:
             return redirect('avaliaralternativas', projeto_id)
         else:
@@ -213,35 +259,9 @@ def avaliarcriterios(request, projeto_id):
         request, template_name, {
             'campos': request,
             'decisores': decisores,
-            'criterios_combinados': criterios_combinados,
-            'projeto_nome': projeto.nome,
+            'forms': forms,
+            'projeto': projeto,
         })
-
-
-def parametroCriterio(request, projeto_id):
-    '''
-    View para avaliar as alternativas cadastradas.
-    '''
-    template_name = 'parametro_criterio.html'
-    projeto = Projeto.objects.get(id=projeto_id)
-    criterios = list(Criterio.objects.filter(projeto=projeto_id))
-    formsetQuali = formset_factory(form=CriterioParametroForm, extra=0)
-    formsQuali = formsetQuali(initial=[{
-        'projeto': projeto,
-        'criterio': criterio
-    } for criterio in criterios])
-
-    if request.method == 'POST':
-        formsQuali = formsetQuali(request.POST)
-        for form in formsQuali:
-            if form.is_valid():
-                form.save()
-
-        return redirect('resultado', projeto_id)
-
-    return render(request, template_name, {
-        'formsQuali': formsQuali,
-    })
 
 
 def avaliaralternativas(request, projeto_id):
@@ -254,53 +274,57 @@ def avaliaralternativas(request, projeto_id):
     decisores = Decisor.objects.filter(projeto=projeto_id)
     criterios = Criterio.objects.filter(projeto=projeto_id, numerico=False)
     alternativas = Alternativa.objects.filter(projeto=projeto_id)
+    avaliacoes_alternativas_queryset = list(
+        AvaliacaoAlternativas.objects.filter(projeto=projeto))
 
     alternativas_combinadas = list(combinations(alternativas, 2))
 
+    formset = formset_factory(form=AvaliacaoAlternativasForm, extra=0)
+
+    if request.method == 'GET':
+        if avaliacoes_alternativas_queryset:
+            forms = formset(initial=[{
+                'projeto': i.projeto,
+                'decisor': i.decisor,
+                'criterio': i.criterio,
+                'alternativaA': i.alternativaA,
+                'alternativaB': i.alternativaB,
+                'nota': i.nota
+            } for i in avaliacoes_alternativas_queryset])
+        else:
+            forms = formset(initial=[{
+                'projeto': projeto,
+                'decisor': decisor,
+                'criterio': criterio,
+                'alternativaA': alternativaA,
+                'alternativaB': alternativaB,
+            } for decisor, criterio, (alternativaA, alternativaB) in product(
+                decisores, criterios, alternativas_combinadas)])
+
     if request.method == 'POST':
-        campos = dict(request.POST)
-        _ = campos.pop('csrfmiddlewaretoken')
-        decisor_id = campos.pop('decisor_id')
-        criterio_id = campos.pop('criterio_id')
-
-        decisor_criterio = list(product(decisor_id, set(criterio_id)))
-
-        notas_avaliadores = dict()
-        for key, value in campos.items():
-            tuplas = list(zip(decisor_criterio, value))
-            notas_avaliadores[eval(key)] = tuplas
-
-        for (alternativaA,
-             alternativaB), avaliacoes in notas_avaliadores.items():
-            for ((avaliador, criterio), nota) in avaliacoes:
-                decisor = Decisor.objects.get(id=int(avaliador))
-                criterio = Criterio.objects.get(id=criterio)
-                alternativa1 = Alternativa.objects.get(id=int(alternativaA))
-                alternativa2 = Alternativa.objects.get(id=int(alternativaB))
-                avaliacao = AvaliacaoAlternativas(projeto=projeto,
-                                                  decisor=decisor,
-                                                  criterio=criterio,
-                                                  alternativaA=alternativa1,
-                                                  alternativaB=alternativa2,
-                                                  nota=int(nota))
-                avaliacao.save()
-
-                avaliacao = AvaliacaoAlternativas(projeto=projeto,
-                                                  decisor=decisor,
-                                                  criterio=criterio,
-                                                  alternativaA=alternativa2,
-                                                  alternativaB=alternativa1,
-                                                  nota=-int(nota))
-                avaliacao.save()
+        avaliacao_criterios_formset = formset(request.POST)
+        if avaliacao_criterios_formset.is_valid():
+            AvaliacaoAlternativas.objects.filter(projeto=projeto).delete()
+            for aval_crit in avaliacao_criterios_formset:
+                if aval_crit.is_valid():
+                    avalcrit = aval_crit.save()
+                    avalcrit.projeto = projeto
+                    avalcrit.nota = int(avalcrit.nota)
+                    avalcrit.save()
+                    avalcrit.pk = None
+                    avalcrit.alternativaA, avalcrit.alternativaB = \
+                        avalcrit.alternativaB, avalcrit.alternativaA
+                    avalcrit.nota = -avalcrit.nota
+                    avalcrit.save()
 
         return redirect('resultadosapevo', projeto_id)
 
     return render(
         request, template_name, {
             'decisores': decisores,
-            'alternativas_combinadas': alternativas_combinadas,
+            'forms': forms,
             'criterios': criterios,
-            'projeto_nome': projeto.nome,
+            'projeto': projeto,
         })
 
 
@@ -316,12 +340,24 @@ def resultado_sapevo(request, projeto_id):
     valores = valores.to_dataframe().to_html()
     alternativas = Alternativa.objects.filter(projeto=projeto_id)
     df_criterios = matriz.avaliacoes['criterios'].to_html()
-
     formsetQuali = formset_factory(form=CriterioParametroForm, extra=0)
-    formsQuali = formsetQuali(initial=[{
-        'projeto': projeto,
-        'criterio': criterio
-    } for criterio in criterios])
+    criterio_parametro_queryset = list(
+        CriterioParametro.objects.filter(projeto=projeto))
+
+    if request.method == 'GET':
+        if criterio_parametro_queryset:
+            formsQuali = formsetQuali(initial=[{
+                'projeto': i.projeto,
+                'criterio': i.criterio,
+                'p': i.p,
+                'q': i.q,
+                'v': i.v,
+            } for i in criterio_parametro_queryset])
+        else:
+            formsQuali = formsetQuali(initial=[{
+                'projeto': projeto,
+                'criterio': criterio
+            } for criterio in criterios])
 
     if alternativas:
         df_alternativas = matriz.avaliacoes['alternativas'].to_html()
@@ -332,6 +368,7 @@ def resultado_sapevo(request, projeto_id):
         df_alternativas = None
 
     if request.method == 'POST':
+        CriterioParametro.objects.filter(projeto=projeto).delete()
         formsQuali = formsetQuali(request.POST)
         for form in formsQuali:
             if form.is_valid():

@@ -112,12 +112,14 @@ class MatrizProjeto:
         pontuacao.index.rename('Alternativa', inplace=True)
         pontuacao.columns.rename('Critério', inplace=True)
 
-        df_alt_crit = self.alternativas_criterios.to_pivot_table(
-            values='nota', rows='alternativa', cols='criterio')
-
-        pontuacao = pd.concat([
-            pontuacao,
-            df_alt_crit,
-        ], axis=1)
+        try:
+            df_alt_crit = self.alternativas_criterios.to_pivot_table(
+                values='nota', rows='alternativa', cols='criterio')
+            pontuacao = pd.concat([
+                pontuacao,
+                df_alt_crit,
+            ], axis=1)
+        except:
+            pass
 
         return pontuacao

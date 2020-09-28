@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block container %}
 
+
+      {% include 'partials/passo_a_passo.html' %}
 <h1>Resultado parcial do projeto "{{projeto.nome}}"</h1>
 
 <hr>
@@ -40,15 +42,15 @@
                   
                    <td class="ml-8"></td>
                    <td class="ml-8">{{ form.criterio.label }}</td>
-                   <td class="ml-8">{{ form.p.label }}</td>
                    <td class="ml-8">{{ form.q.label }}</td>
+                   <td class="ml-8">{{ form.p.label }}</td>
                    <td class="ml-8">{{ form.v.label }}</td>
                 </tr>
                 <tr>
                    <td class="ml-8">{{ form.projeto }}</td>
                    <td class="ml-8">{{ form.criterio }}</td>
-                   <td class="ml-8">{{ form.p }}</td>
                    <td class="ml-8">{{ form.q }}</td>
+                   <td class="ml-8">{{ form.p }}</td>
                    <td class="ml-8">{{ form.v }}</td>
                 </tr>
                 {% endfor %}
