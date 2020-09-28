@@ -183,8 +183,7 @@ def alternativacriterio(request, projeto_id):
             } for (alternativa, criterio) in combinacoes])
         return render(request, template_name, {
             'forms': forms,
-            'projeto_nome': projeto.nome,
-            'projeto_id': projeto_id
+            'projeto': projeto,
         })
 
     if request.method == 'POST':
@@ -216,13 +215,13 @@ def avaliarcriterios(request, projeto_id):
 
     formset = formset_factory(form=AvaliacaoCriteriosForm, extra=0)
 
-    if request.method == 'get':
+    if request.method == 'GET':
         if avaliacao_criterios_queryset:
             forms = formset(initial=[{
                 'projeto': i.projeto,
                 'decisor': i.decisor,
-                'criterioa': i.criterioa,
-                'criteriob': i.criteriob,
+                'criterioA': i.criterioA,
+                'criterioB': i.criterioB,
                 'nota': i.nota
             } for i in avaliacao_criterios_queryset])
         else:
