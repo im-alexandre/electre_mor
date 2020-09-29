@@ -15,7 +15,9 @@
             <tbody>
                 {% for form in decisor_form_set.forms %}
                 <tr>
-                   <td class="ml-8">{{ form }}</td>
+                <td class="ml-8">{{ form.id }}</td>
+                <td class="ml-8">{{ form.nome.label }}</td>
+                <td class="ml-8">{{ form.nome }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -25,9 +27,11 @@
         <hr>
         <h1>Critérios</h1>
         <table id="criterio_form_set">
+            {% comment %}{{ criterio_form_set.as_table }}{% endcomment %}
             <tbody>
             {% for form in criterio_form_set.forms %}
             <tr>
+                <td class="ml-8">{{ form.id }}</td>
                 <td class="ml-8">{{ form.nome.label }}</td>
                 <td class="ml-8">{{ form.nome }}</td>
                 <td class="ml-8">{{ form.numerico.label }}</td>
@@ -37,8 +41,8 @@
             </tr>
             {% endfor %}
             </tbody>
-        </table>
         {{ criterio_form_set.management_form }}
+        </table>
 
 
         <h1>Alternativas</h1>
@@ -46,7 +50,9 @@
             <tbody>
             {% for form in alternativa_form_set.forms %}
             <tr>
-                <td class="ml-8">{{ form }}</td>
+                <td class="ml-8">{{ form.id }}</td>
+                <td class="ml-8">{{ form.nome.label }}</td>
+                <td class="ml-8">{{ form.nome }}</td>
             </tr>
             {% endfor %}
             </tbody>
@@ -69,12 +75,6 @@
     $(function() {
         $('#criterio_form_set tbody tr').formset({
        prefix: '{{ criterio_form_set.prefix }}',
-       formCssClass: 'dynamic-formset2'
-    });
-    });
-    $(function() {
-        $('#criterio_numerico_form_set tbody tr').formset({
-       prefix: '{{ criterio_numerico_form_set.prefix }}',
        formCssClass: 'dynamic-formset2'
     });
     });

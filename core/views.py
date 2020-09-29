@@ -5,7 +5,7 @@ import zipfile
 from itertools import combinations, permutations, product
 
 import pandas as pd
-from django.forms import formset_factory
+from django.forms import HiddenInput, formset_factory, modelformset_factory
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render, reverse
 
@@ -83,70 +83,58 @@ def deletarprojeto(request, projeto_id):
 def cadastradecisores(request, projeto_id):
     projeto = Projeto.objects.get(id=projeto_id)
     template_name = 'cadastra_decisores.html'
-    projeto_nome = projeto.nome
     decisores = Decisor.objects.filter(projeto=projeto)
     criterios = Criterio.objects.filter(projeto=projeto)
     alternativas = Alternativa.objects.filter(projeto=projeto)
-    decisoresformset = formset_factory(form=DecisorForm)
-    criteriosformset = formset_factory(form=CriterioForm)
-    alternativasformset = formset_factory(form=AlternativaForm)
+    decisoresformset = modelformset_factory(
+        model=Decisor,
+        fields=('nome', ),
+        can_delete=True,
+    )
 
-    if request.method == 'GET':
-        if criterios.exists():
-            criterio_form_set = criteriosformset(initial=[{
-                'nome':
-                i.nome,
-                'numerico':
-                i.numerico,
-                'monotonico':
-                i.monotonico,
-            } for i in list(criterios)],
-                prefix='critform')
-        else:
-            criterio_form_set = criteriosformset(prefix='critform')
+    criteriosformset = modelformset_factory(model=Criterio,
+                                            fields=('id', 'nome', 'numerico',
+                                                    'monotonico'),
+                                            can_delete=True)
+    alternativasformset = modelformset_factory(model=Alternativa,
+                                               fields=('nome', ),
+                                               can_delete=True)
 
-        if decisores.exists():
-            decisor_form_set = decisoresformset(initial=[{
-                'nome': i.nome,
-            } for i in list(decisores)],
-                prefix='decform')
-        else:
-            decisor_form_set = decisoresformset(prefix='decform')
-
-        if alternativas.exists():
-            alternativa_form_set = alternativasformset(initial=[{
-                'nome': i.nome,
-            } for i in list(alternativas)],
-                prefix='altform')
-        else:
-            alternativa_form_set = alternativasformset(prefix='altform')
+    criterio_form_set = criteriosformset(queryset=criterios, prefix='critform')
+    decisor_form_set = decisoresformset(queryset=decisores, prefix='decform')
+    alternativa_form_set = alternativasformset(queryset=alternativas,
+                                               prefix='altform')
 
     if request.method == 'POST':
-        decisor_form_set, criterios_form_set, alternativa_form_set = \
-            (decisoresformset(request.POST, prefix='decform'),
-             criteriosformset(request.POST, prefix='critform'),
-             alternativasformset(request.POST, prefix='altform'))
+        decisor_form_set, criterios_form_set, alternativa_form_set = (
+            decisoresformset(request.POST, prefix='decform'),
+            criteriosformset(request.POST, prefix='critform'),
+            alternativasformset(request.POST, prefix='altform'))
         if decisor_form_set.is_valid():
-            Decisor.objects.filter(projeto=projeto).delete()
+            # Decisor.objects.filter(projeto=projeto).delete()
             for decisor_form in decisor_form_set:
                 if decisor_form.is_valid():
                     decisor_novo = decisor_form.save()
                     decisor_novo.projeto = projeto
                     decisor_novo.save()
+
         if alternativa_form_set.is_valid():
-            Alternativa.objects.filter(projeto=projeto).delete()
+            # Alternativa.objects.filter(projeto=projeto).delete()
             for alternativa_form in alternativa_form_set:
                 if alternativa_form.is_valid():
                     nova_alternativa = alternativa_form.save()
                     nova_alternativa.projeto = projeto
                     nova_alternativa.save()
         if criterios_form_set.is_valid():
-            Criterio.objects.filter(projeto=projeto).delete()
+            # Criterio.objects.filter(projeto=projeto).delete()
             for criterio_form in criterios_form_set:
                 if criterio_form.is_valid():
                     criterio_novo = criterio_form.save()
                     criterio_novo.projeto = projeto
                     criterio_novo.save()
+
+        else:
+            print(criterios_form_set.errors)
         return redirect('alternativacriterio', projeto_id=projeto.id)
 
     return render(
@@ -244,8 +232,7 @@ def avaliarcriterios(request, projeto_id):
                     avalcrit.nota = int(avalcrit.nota)
                     avalcrit.save()
                     avalcrit.pk = None
-                    avalcrit.criterioA, avalcrit.criterioB = \
-                        avalcrit.criterioB, avalcrit.criterioA
+                    avalcrit.criterioA, avalcrit.criterioB = avalcrit.criterioB, avalcrit.criterioA
                     avalcrit.nota = -avalcrit.nota
                     avalcrit.save()
 
@@ -311,8 +298,7 @@ def avaliaralternativas(request, projeto_id):
                     avalcrit.nota = int(avalcrit.nota)
                     avalcrit.save()
                     avalcrit.pk = None
-                    avalcrit.alternativaA, avalcrit.alternativaB = \
-                        avalcrit.alternativaB, avalcrit.alternativaA
+                    avalcrit.alternativaA, avalcrit.alternativaB = avalcrit.alternativaB, avalcrit.alternativaA
                     avalcrit.nota = -avalcrit.nota
                     avalcrit.save()
 

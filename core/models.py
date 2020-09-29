@@ -5,7 +5,7 @@ from django_pandas.managers import DataFrameManager
 
 class Decisor(models.Model):
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
-    nome = models.CharField(max_length=20)
+    nome = models.CharField(max_length=20, blank=False, null=False)
 
     def __str__(self):
         return self.nome
@@ -23,7 +23,7 @@ class Projeto(models.Model):
 
 class Alternativa(models.Model):
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
-    nome = models.CharField(max_length=20)
+    nome = models.CharField(max_length=20, blank=False, null=False)
 
     def __str__(self):
         return self.nome
@@ -33,7 +33,7 @@ class Criterio(models.Model):
 
     escolhas = ((1, "lucro"), (2, "custo"))
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
-    nome = models.CharField(max_length=20)
+    nome = models.CharField(max_length=20, blank=False, null=False)
     numerico = models.BooleanField(default=False)
     monotonico = models.IntegerField(choices=escolhas, default=1)
 
