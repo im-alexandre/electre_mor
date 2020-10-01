@@ -4,8 +4,14 @@ from django_pandas.managers import DataFrameManager
 
 
 class Decisor(models.Model):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['nome', 'projeto'],
+                                    name='unique_decisor')
+        ]
+
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
-    nome = models.CharField(max_length=20, blank=False, null=False)
+    nome = models.CharField(max_length=20)
 
     def __str__(self):
         return self.nome
@@ -13,8 +19,8 @@ class Decisor(models.Model):
 
 class Projeto(models.Model):
     nome = models.CharField(max_length=20)
-    descricao = models.TextField(max_length=400, blank=True)
-    qtde_classes = models.IntegerField(null=True, default=2)
+    descricao = models.TextField(max_length=400)
+    qtde_classes = models.IntegerField(null=False)
     lamb = models.FloatField(null=True, default=0.5)
 
     def __str__(self):
@@ -22,14 +28,25 @@ class Projeto(models.Model):
 
 
 class Alternativa(models.Model):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['nome', 'projeto'],
+                                    name='unique_alternativa')
+        ]
+
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)
-    nome = models.CharField(max_length=20, blank=False, null=False)
+    nome = models.CharField(max_length=20)
 
     def __str__(self):
         return self.nome
 
 
 class Criterio(models.Model):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['nome', 'projeto'],
+                                    name='unique_criterio')
+        ]
 
     escolhas = ((1, "lucro"), (2, "custo"))
     projeto = models.ForeignKey('Projeto', on_delete=models.CASCADE, null=True)

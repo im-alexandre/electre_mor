@@ -229,6 +229,15 @@
         return $$;
     };
 
+    requerido = function(){
+        document.querySelectorAll("input").forEach(function(erro){
+            erro.setAttribute('required','');
+        })
+        document.querySelectorAll("input[type='checkbox'").forEach(function(erro){
+            erro.removeAttribute('required')
+        })
+    }
+
     /* Setup plugin defaults */
     $.fn.formset.defaults = {
         prefix: 'form',                  // The form prefix for your django formset
@@ -242,7 +251,7 @@
         formCssClass: 'dynamic-form',    // CSS class applied to each form in a formset
         extraClasses: [],                // Additional CSS classes, which will be applied to each form in turn
         keepFieldValues: '',             // jQuery selector for fields whose values should be kept when the form is cloned
-        added: null,                     // Function called each time a new form is added
+        added: requerido,                     // Function called each time a new form is added
         removed: null,                   // Function called each time a form is deleted
         hideLastAddForm: false           // When set to true, hide last empty add form (becomes visible when clicking on add button)
     };
