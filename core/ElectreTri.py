@@ -33,18 +33,7 @@ class ElectreTri():
         coluna_escalonada = np.arange(min(coluna), max(coluna), escala)[1:]
         return coluna_escalonada
 
-    def pessimista(self, row):
-        """docstring for pessimista"""
-        if row['cred(b,x)'] >= self.lamb and row['cred(x,b)'] >= self.lamb:
-            return 'x I b'
-        elif row['cred(b,x)'] >= self.lamb and row['cred(x,b)'] < self.lamb:
-            return 'x < b'
-        elif row['cred(b,x)'] < self.lamb and row['cred(x,b)'] >= self.lamb:
-            return 'x > b'
-        else:
-            return 'x R b'
-
-    def otimista(self, row):
+    def comparacao(self, row):
         """docstring for pessimista"""
         if row['cred(b,x)'] >= self.lamb and row['cred(x,b)'] >= self.lamb:
             return 'x I b'
@@ -181,11 +170,8 @@ class ElectreTri():
         ],
             axis=1)
 
-        self.credibilidade_df['pesimista'] = self.credibilidade_df.apply(
-            self.pessimista, axis=1)
-
-        self.credibilidade_df['otimista'] = self.credibilidade_df.apply(
-            self.otimista, axis=1)
+        self.credibilidade_df['comparacao'] = self.credibilidade_df.apply(
+            self.comparacao, axis=1)
 
         self.credibilidade_df['lambda'] = self.lamb
 
@@ -200,7 +186,40 @@ class ElectreTri():
         self.df_credibilidade_x_b.to_excel(tab, 'credibilidade_x_b')
         self.credibilidade_df.to_excel(tab, 'classificações')
         tab.save()
+
         return self.credibilidade_df
+
+    def __pessimista(self, credibilidade: pd.DataFrame):
+        """Classificação pessimista das alternativas"""
+        cla = credibilidade.reset_index()
+        cla = cla[cla['comparacao'].isin(['x I b', 'x > b'])]
+        qtde_classes = cla.shape[0] + 1
+        cla = cla.drop_duplicates(subset=['alternativa'])
+        index = list(cla.index.values)[0] + 1
+        numero_da_classe = 'Classe ' + str(qtde_classes - (index + 1))
+        return numero_da_classe
+
+    def pessimista(self):
+        """docstring for pessimista"""
+        df = self.credibilidade_df.groupby(
+            level='alternativa').apply(lambda x: self.__pessimista(x))
+        return df
+
+    def __otimista(self, credibilidade: pd.DataFrame):
+        """Classificação otimista das alternativas"""
+        cla = credibilidade.reset_index()
+        cla = cla[cla['comparacao'].isin(['x I b', 'x R b', 'x > b'])]
+        qtde_classes = cla.shape[0] + 1
+        cla = cla.drop_duplicates(subset=['alternativa'])
+        index = list(cla.index.values)[0] + 1
+        numero_da_classe = 'Classe ' + str(qtde_classes - (index + 1))
+        return numero_da_classe
+
+    def otimista(self):
+        """docstring for otimista"""
+        df = self.credibilidade_df.groupby(
+            level='alternativa').apply(lambda x: self.__otimista(x))
+        return df
 
 
 if __name__ == '__main__':

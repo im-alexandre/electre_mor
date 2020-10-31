@@ -5,9 +5,6 @@ import zipfile
 from itertools import combinations, permutations, product
 
 import pandas as pd
-from django.forms import HiddenInput, formset_factory, modelformset_factory
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect, render, reverse
 
 from core.forms import (AlternativaCriterioForm, AlternativaForm,
                         AvaliacaoAlternativas, AvaliacaoAlternativasForm,
@@ -16,6 +13,9 @@ from core.forms import (AlternativaCriterioForm, AlternativaForm,
 from core.models import (Alternativa, AlternativaCriterio,
                          AvaliacaoAlternativas, AvaliacaoCriterios, Criterio,
                          CriterioParametro, Decisor, Projeto)
+from django.forms import HiddenInput, formset_factory, modelformset_factory
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect, render, reverse
 
 from .ElectreTri import ElectreTri
 from .method import MatrizProjeto
@@ -430,19 +430,36 @@ def resultado(request, projeto_id):
                                                cols=['criterio'])
         parametros.loc['w'] = matriz.pesos_criterios['peso'].values
         parametros.index.rename('parametros')
-        electre = ElectreTri(pontuacao_alternativas,
-                             parametros,
-                             lamb=lamb,
-                             bn=bn,
-                             method='quantil')
-        df_cla_quantil = electre.renderizar().to_html()
+        print('Quantil*******************************\n')
+        electre_quantil = ElectreTri(pontuacao_alternativas,
+                                     parametros,
+                                     lamb=lamb,
+                                     bn=bn,
+                                     method='quantil')
+        df_cla_quantil = electre_quantil.renderizar().to_html()
+        otimista_quantil, pessimista_quantil = electre_quantil.otimista(
+        ).to_frame(name='Otimista'), electre_quantil.pessimista().to_frame(
+            name='Pessimista')
+        classificacao_quantil = pd.merge(otimista_quantil,
+                                         pessimista_quantil,
+                                         right_index=True,
+                                         left_index=True)
+
+        print('Range*********************************\n')
         electre = ElectreTri(pontuacao_alternativas,
                              parametros,
                              lamb=lamb,
                              bn=bn,
                              method='range')
 
-        df_cla_range = electre.renderizar().to_html()
+        df_cla = electre.renderizar().to_html()
+
+        otimista, pessimista = (electre.otimista().to_frame(
+            name='Otimista'), electre.pessimista().to_frame(name='Pessimista'))
+        classificacao = pd.merge(otimista,
+                                 pessimista,
+                                 right_index=True,
+                                 left_index=True)
 
         for criterio in criterios_custo:
             pontuacao_alternativas[
@@ -453,12 +470,15 @@ def resultado(request, projeto_id):
         pontuacao_alternativas = None
 
     return render(
-        request, 'resultado.html', {
+        request,
+        'resultado.html',
+        {
             'projeto': projeto,
             'pesos': pesos,
             'pontuacao_alternativas': pontuacao_alternativas,
-            'df_cla_range': df_cla_range,
-            'df_cla_quantil': df_cla_quantil,
+            'df_cla_range': classificacao.to_html(),
+            'df_cla_quantil': classificacao_quantil.to_html(),
+            # 'df_cla_quantil': df_cla_quantil,
         })
 
 
