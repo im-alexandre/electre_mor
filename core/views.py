@@ -86,19 +86,23 @@ def cadastradecisores(request, projeto_id):
     decisores = Decisor.objects.filter(projeto=projeto)
     criterios = Criterio.objects.filter(projeto=projeto)
     alternativas = Alternativa.objects.filter(projeto=projeto)
+    decisores_nome = {decisor.nome for decisor in decisores}
+    criterios_nome = {criterio.nome for criterio in criterios}
+    alternativas_nome = {alternativa.nome for alternativa in alternativas}
+
     decisoresformset = modelformset_factory(
         model=Decisor,
         fields=('nome', ),
-        can_delete=True,
     )
 
-    criteriosformset = modelformset_factory(model=Criterio,
-                                            fields=('id', 'nome', 'numerico',
-                                                    'monotonico'),
-                                            can_delete=True)
-    alternativasformset = modelformset_factory(model=Alternativa,
-                                               fields=('nome', ),
-                                               can_delete=True)
+    criteriosformset = modelformset_factory(
+        model=Criterio,
+        fields=('nome', 'numerico', 'monotonico'),
+    )
+    alternativasformset = modelformset_factory(
+        model=Alternativa,
+        fields=('nome', ),
+    )
 
     criterio_form_set = criteriosformset(queryset=criterios, prefix='critform')
     decisor_form_set = decisoresformset(queryset=decisores, prefix='decform')
@@ -110,33 +114,52 @@ def cadastradecisores(request, projeto_id):
             decisoresformset(request.POST, prefix='decform'),
             criteriosformset(request.POST, prefix='critform'),
             alternativasformset(request.POST, prefix='altform'))
-        if decisor_form_set.is_valid():
-            # Decisor.objects.filter(projeto=projeto).delete()
+
+        decisor_form_nomes = {
+            decisor_form['nome'].value()
+            for decisor_form in decisor_form_set
+        }
+        criterio_form_nomes = {
+            criterio_form['nome'].value()
+            for criterio_form in criterios_form_set
+        }
+        alternativa_form_nomes = {
+            alternativa_form['nome'].value()
+            for alternativa_form in alternativa_form_set
+        }
+
+        if all([
+                decisor_form_set.is_valid(),
+                alternativa_form_set.is_valid(),
+                criterios_form_set.is_valid()
+        ]):
+            delete_decisores = decisores_nome - decisor_form_nomes
+            Decisor.objects.filter(nome__in=delete_decisores).delete()
             for decisor_form in decisor_form_set:
                 if decisor_form.is_valid():
                     decisor_novo = decisor_form.save()
                     decisor_novo.projeto = projeto
                     decisor_novo.save()
 
-        if alternativa_form_set.is_valid():
-            # Alternativa.objects.filter(projeto=projeto).delete()
+            delete_alternativas = alternativas_nome - alternativa_form_nomes
+            Alternativa.objects.filter(nome__in=delete_alternativas).delete()
             for alternativa_form in alternativa_form_set:
                 if alternativa_form.is_valid():
                     nova_alternativa = alternativa_form.save()
                     nova_alternativa.projeto = projeto
                     nova_alternativa.save()
-        if criterios_form_set.is_valid():
-            # Criterio.objects.filter(projeto=projeto).delete()
+
+            delete_criterios = criterios_nome - criterio_form_nomes
+            Criterio.objects.filter(nome__in=delete_criterios).delete()
             for criterio_form in criterios_form_set:
                 if criterio_form.is_valid():
                     criterio_novo = criterio_form.save()
                     criterio_novo.projeto = projeto
                     criterio_novo.save()
 
-        else:
-            print(criterios_form_set.errors)
-        return redirect('alternativacriterio', projeto_id=projeto.id)
-
+            return redirect('alternativacriterio', projeto_id=projeto.id)
+        print(decisor_form_set.errors, alternativa_form_set.errors,
+              criterios_form_set.errors)
     return render(
         request, template_name, {
             'decisor_form_set': decisor_form_set,

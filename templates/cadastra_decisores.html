@@ -14,8 +14,11 @@
         <table id="decisor_form_set">
             <tbody>
                 {% for form in decisor_form_set.forms %}
+                {% for hidden in form.hidden_fields %}
+                  {{ hidden}}
+                  {% endfor %}
                 <tr>
-                <td class="ml-8">{{ form.id }}</td>
+                {% comment %}<td class="ml-8">{{ form.id }}</td>{% endcomment %}
                 <td class="ml-8">{{ form.nome.label }}</td>
                 <td class="ml-8">{{ form.nome }}</td>
                 </tr>
@@ -30,8 +33,11 @@
             {% comment %}{{ criterio_form_set.as_table }}{% endcomment %}
             <tbody>
             {% for form in criterio_form_set.forms %}
+              {% for hidden in form.hidden_fields %}
+              {{ hidden}}
+            {% endfor %}
             <tr>
-                <td class="ml-8">{{ form.id }}</td>
+                {% comment %}<td class="ml-8">{{ form.id }}</td>{% endcomment %}
                 <td class="ml-8">{{ form.nome.label }}</td>
                 <td class="ml-8">{{ form.nome }}</td>
                 <td class="ml-8">{{ form.numerico.label }}</td>
@@ -49,8 +55,11 @@
         <table id="alternativa_form_set">
             <tbody>
             {% for form in alternativa_form_set.forms %}
+                  {% for hidden in form.hidden_fields %}
+                  {{ hidden}}
+            {% endfor %}
             <tr>
-                <td class="ml-8">{{ form.id }}</td>
+                {% comment %}<td class="ml-8">{{ form.id }}</td>{% endcomment %}
                 <td class="ml-8">{{ form.nome.label }}</td>
                 <td class="ml-8">{{ form.nome }}</td>
             </tr>
