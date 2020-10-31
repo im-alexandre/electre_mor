@@ -436,7 +436,7 @@ def resultado(request, projeto_id):
                                      lamb=lamb,
                                      bn=bn,
                                      method='quantil')
-        df_cla_quantil = electre_quantil.renderizar().to_html()
+        df_cla_quantil = electre_quantil.renderizar()
         otimista_quantil, pessimista_quantil = electre_quantil.otimista(
         ).to_frame(name='Otimista'), electre_quantil.pessimista().to_frame(
             name='Pessimista')
@@ -452,7 +452,7 @@ def resultado(request, projeto_id):
                              bn=bn,
                              method='range')
 
-        df_cla = electre.renderizar().to_html()
+        df_cla = electre.renderizar()
 
         otimista, pessimista = (electre.otimista().to_frame(
             name='Otimista'), electre.pessimista().to_frame(name='Pessimista'))
