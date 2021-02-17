@@ -30,7 +30,7 @@ class ElectreTri():
 
     def _escalona(self, coluna):
         escala = (max(coluna) - min(coluna)) / (self.bn)
-        coluna_escalonada = np.arange(min(coluna), max(coluna), escala)[1:-1]
+        coluna_escalonada = np.arange(min(coluna), max(coluna), escala)[1:]
         return coluna_escalonada
 
     def comparacao(self, row):
