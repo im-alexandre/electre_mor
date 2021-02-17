@@ -30,7 +30,7 @@ class ElectreTri():
 
     def _escalona(self, coluna):
         escala = (max(coluna) - min(coluna)) / (self.bn)
-        coluna_escalonada = np.arange(min(coluna), max(coluna), escala)[1:]
+        coluna_escalonada = np.arange(min(coluna), max(coluna), escala)[1:-1]
         return coluna_escalonada
 
     def comparacao(self, row):
@@ -60,7 +60,7 @@ class ElectreTri():
             credibilidade = concordancia
             return credibilidade
 
-    def discordancia(self, serie: pd.Series, xi: str, bh: pd.Series) -> float:
+    def discordancia(self, serie: pd.Series, xi: str, bh: str) -> float:
         """
         Calcula a dicordância entre a classe e a alternativa (ou vice-versa),
         dada uma série com os atributos da alternativa, os critérios e as
